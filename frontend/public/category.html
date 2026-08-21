@@ -260,19 +260,7 @@
                 <p class="text-gray-300 text-xs mt-1">Login to book your favourite venues</p>
             </div>
             <div class="p-6">
-                <form id="loginForm" class="space-y-3" onsubmit="event.preventDefault(); handleLoginSubmit();">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Phone Number</label>
-                        <div class="flex">
-                            <span class="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-200 rounded-l-lg text-sm text-gray-500">+91</span>
-                            <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" maxlength="10" pattern="[0-9]{10}" required class="flex-1 p-2.5 border border-gray-200 rounded-r-lg outline-none focus:border-custom-light text-sm transition-colors" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                        </div>
-                    </div>
-                    <button type="submit" id="loginSubmitBtn" class="w-full bg-custom-light text-white py-3 rounded-lg font-bold hover:bg-custom-lightHover transition shadow-md">
-                        Continue <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </form>
-                <p class="text-[10px] text-gray-400 text-center mt-4">By continuing, you agree to our <a href="#" class="text-custom-light font-bold">Terms & Conditions</a></p>
+                <div class="space-y-6"><p class="text-sm text-gray-500 font-medium">Sign in or create an account to book your favourite venues.</p><button class="w-full bg-custom-light text-white py-3 rounded-lg font-bold shadow-md hover:bg-custom-lightHover transition" onclick="window.location.href='auth.html'">Continue to Login</button></div>
             </div>
         </div>
     </div>
@@ -489,9 +477,14 @@
             loadGrounds();
         }
 
+        // Auth redirect
+        function openLoginModal() {
+            sessionStorage.setItem('ems_return_url', window.location.href);
+            window.location.href = 'auth.html';
+        }
+
         // Location state managed by js/location-state.js (EMS_LOCATION)
         window.openLoginModal    = openLoginModal;
-        window.handleLoginSubmit = handleLoginSubmit;
 
         // Search handler
         const searchInput = document.getElementById('searchInput');

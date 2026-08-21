@@ -40,11 +40,6 @@
         }
         .btn-primary:hover { background: #e04c1a; }
         .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
-        .otp-input {
-            width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
-            border: 2px solid #e5e7eb; border-radius: 10px; outline: none; transition: border-color 0.2s;
-        }
-        .otp-input:focus { border-color: #f05a28; }
     </style>
 </head>
 
@@ -81,47 +76,49 @@
                     </button>
                 </div>
 
-                <!-- LOGIN FORM -->
+                <!-- LOGIN FORM — Email + Password -->
                 <form id="loginForm" class="p-6 sm:p-8 space-y-5" onsubmit="event.preventDefault(); handleLogin();">
-                    <div id="loginPhoneSection">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Phone Number</label>
-                        <div class="flex items-center">
-                            <span class="inline-flex items-center px-4 py-3 bg-gray-100 border border-r-0 border-gray-200 rounded-l-lg text-sm text-gray-500 font-medium">+91</span>
-                            <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" maxlength="10" pattern="[0-9]{10}" required
-                                class="flex-1 p-3 border border-gray-200 rounded-r-lg outline-none focus:border-custom-light text-sm transition-colors" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Email Address</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fa-solid fa-envelope text-sm"></i>
+                            </span>
+                            <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email"
+                                class="input-field pl-10">
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">We will send you a one-time SMS verification code.</p>
                     </div>
 
-                    <!-- OTP Section (hidden initially) -->
-                    <div id="otpSection" class="hidden">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Enter OTP</label>
-                        <p class="text-xs text-gray-500 mb-3">Sent to +91 <span id="otpPhoneDisplay"></span></p>
-                        <div class="flex gap-2 justify-center mb-2" id="otpInputs">
-                            <input type="text" maxlength="1" class="otp-input" data-index="0" oninput="moveOtp(this, 0)" onkeydown="backOtp(event, 0)">
-                            <input type="text" maxlength="1" class="otp-input" data-index="1" oninput="moveOtp(this, 1)" onkeydown="backOtp(event, 1)">
-                            <input type="text" maxlength="1" class="otp-input" data-index="2" oninput="moveOtp(this, 2)" onkeydown="backOtp(event, 2)">
-                            <input type="text" maxlength="1" class="otp-input" data-index="3" oninput="moveOtp(this, 3)" onkeydown="backOtp(event, 3)">
-                            <input type="text" maxlength="1" class="otp-input" data-index="4" oninput="moveOtp(this, 4)" onkeydown="backOtp(event, 4)">
-                            <input type="text" maxlength="1" class="otp-input" data-index="5" oninput="moveOtp(this, 5)" onkeydown="backOtp(event, 5)">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fa-solid fa-lock text-sm"></i>
+                            </span>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password"
+                                class="input-field pl-10">
                         </div>
-                        <p class="text-xs text-center text-gray-400">Did not receive? <button type="button" onclick="resendOtp()" id="resendBtn" class="text-custom-light font-bold hover:underline">Resend</button> <span id="resendTimer" class="hidden">(<span id="timerSec">30</span>s)</span></p>
                     </div>
 
                     <button type="submit" id="loginBtn" class="btn-primary">
-                        <span id="loginBtnText">Get OTP</span>
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span id="loginBtnText">Login</span>
                     </button>
+
+                    <p class="text-xs text-center text-gray-400">
+                        Don't have an account? <button type="button" onclick="switchTab('register')" class="text-custom-light font-bold hover:underline">Sign up</button>
+                    </p>
                 </form>
 
-                <!-- REGISTER FORM -->
+                <!-- REGISTER FORM — Name, Email, Phone, Password -->
                 <form id="registerForm" class="hidden p-6 sm:p-8 space-y-4" onsubmit="event.preventDefault(); handleRegister();">
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Full Name</label>
                         <input type="text" id="regName" placeholder="Your full name" required class="input-field">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Email</label>
-                        <input type="email" id="regEmail" placeholder="you@example.com" class="input-field">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Email Address</label>
+                        <input type="email" id="regEmail" placeholder="you@example.com" required class="input-field">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Phone Number</label>
@@ -136,8 +133,13 @@
                         <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6" class="input-field">
                     </div>
                     <button type="submit" id="registerBtn" class="btn-primary">
+                        <i class="fa-solid fa-user-plus"></i>
                         <span id="registerBtnText">Create Account</span>
                     </button>
+
+                    <p class="text-xs text-center text-gray-400">
+                        Already have an account? <button type="button" onclick="switchTab('login')" class="text-custom-light font-bold hover:underline">Login</button>
+                    </p>
                 </form>
 
                 <!-- Divider -->
@@ -180,10 +182,6 @@
         var AUTH = window.EMS_AUTH;
         var UI   = window.EMS_UI;
 
-        var loginStep = 'phone';  // 'phone' | 'otp'
-        var loginPhone = '';
-        var resendInterval = null;
-
         // ── Check auth state on load ──────────────────────────────────
         function checkAuth() {
             if (AUTH.isLoggedIn()) {
@@ -216,48 +214,36 @@
         }
 
         function resetLoginState() {
-            loginStep = 'phone';
-            loginPhone = '';
-            document.getElementById('loginPhoneSection').classList.remove('hidden');
-            document.getElementById('otpSection').classList.add('hidden');
-            document.getElementById('loginPhone').value = '';
-            document.getElementById('loginBtnText').innerText = 'Get OTP';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginBtnText').innerText = 'Login';
             document.getElementById('loginBtn').disabled = false;
             document.getElementById('loginForm').classList.remove('hidden');
-            clearResendTimer();
         }
 
-        // ── Login flow ────────────────────────────────────────────────
+        // ── Login flow: Email + Password ──────────────────────────────
+        // Backend: POST /api/v1/auth/login { email, password }
+        // Returns: { success, data: { accessToken, refreshToken, user } }
+
         async function handleLogin() {
             var btn = document.getElementById('loginBtn');
             var btnText = document.getElementById('loginBtnText');
+            var email = (document.getElementById('loginEmail').value || '').trim();
+            var password = document.getElementById('loginPassword').value || '';
 
-            if (loginStep === 'phone') {
-                var phoneInput = document.getElementById('loginPhone');
-                loginPhone = (phoneInput && phoneInput.value || '').trim();
-                if (loginPhone.length !== 10) { UI.toast('Please enter a valid 10-digit number', 'error'); return; }
-                btn.disabled = true; btnText.innerText = 'Sending OTP...';
-                try {
-                    await AUTH.login(loginPhone, 'LOGIN');
-                    showOtpSection();
-                    UI.toast('OTP sent successfully!', 'success');
-                } catch (err) {
-                    UI.toast(err.message || 'Failed to send OTP', 'error');
-                } finally {
-                    btn.disabled = false;
-                    btnText.innerText = 'Get OTP';
-                }
-            } else if (loginStep === 'otp') {
-                var otpInputs = document.querySelectorAll('#otpInputs .otp-input');
-                var otp = '';
-                otpInputs.forEach(function (inp) { otp += inp.value; });
-                if (otp.length !== 6) { UI.toast('Please enter the complete 6-digit OTP', 'error'); return; }
-                btn.disabled = true; btnText.innerText = 'Verifying...';
-                try {
-                    await AUTH.verifyOtp(loginPhone, otp);
+            if (!email || !password) {
+                UI.toast('Please enter both email and password.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerText = 'Logging in...';
+
+            try {
+                var result = await AUTH.login(email, password);
+                if (result.ok && result.data && result.data.success) {
                     UI.toast('Login successful!', 'success');
                     var user = AUTH.getUser();
-                    // Redirect to return URL if set, otherwise to my-bookings.html
                     var returnUrl = sessionStorage.getItem('ems_return_url');
                     if (returnUrl) {
                         sessionStorage.removeItem('ems_return_url');
@@ -267,73 +253,22 @@
                     } else {
                         checkAuth();
                     }
-                } catch (err) {
-                    UI.toast(err.message || 'Invalid OTP. Please try again.', 'error');
-                } finally {
-                    btn.disabled = false;
-                    btnText.innerText = 'Verify & Login';
+                } else {
+                    var errMsg = (result.data && result.data.message) || 'Invalid email or password.';
+                    UI.toast(errMsg, 'error');
                 }
-            }
-        }
-
-        function showOtpSection() {
-            loginStep = 'otp';
-            document.getElementById('loginPhoneSection').classList.add('hidden');
-            document.getElementById('otpSection').classList.remove('hidden');
-            document.getElementById('otpPhoneDisplay').innerText = loginPhone;
-            document.getElementById('loginBtnText').innerText = 'Verify & Login';
-            startResendTimer();
-            var firstInput = document.querySelector('#otpInputs .otp-input');
-            if (firstInput) firstInput.focus();
-        }
-
-        function moveOtp(el, index) {
-            if (el.value.length === 1 && index < 5) {
-                var next = document.querySelector('#otpInputs .otp-input[data-index="' + (index + 1) + '"]');
-                if (next) next.focus();
-            }
-        }
-
-        function backOtp(e, index) {
-            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
-                var prev = document.querySelector('#otpInputs .otp-input[data-index="' + (index - 1) + '"]');
-                if (prev) prev.focus();
-            }
-        }
-
-        function startResendTimer() {
-            clearResendTimer();
-            var sec = 30;
-            document.getElementById('resendTimer').classList.remove('hidden');
-            document.getElementById('resendBtn').classList.add('hidden');
-            document.getElementById('timerSec').innerText = sec;
-            resendInterval = setInterval(function () {
-                sec--;
-                document.getElementById('timerSec').innerText = sec;
-                if (sec <= 0) { clearResendTimer(); }
-            }, 1000);
-        }
-
-        function clearResendTimer() {
-            if (resendInterval) { clearInterval(resendInterval); resendInterval = null; }
-            document.getElementById('resendTimer').classList.add('hidden');
-            document.getElementById('resendBtn').classList.remove('hidden');
-        }
-
-        async function resendOtp() {
-            if (!loginPhone) return;
-            try {
-                await AUTH.login(loginPhone, 'LOGIN');
-                UI.toast('OTP resent!', 'success');
-                startResendTimer();
-                var firstInput = document.querySelector('#otpInputs .otp-input');
-                if (firstInput) { firstInput.value = ''; firstInput.focus(); }
             } catch (err) {
-                UI.toast(err.message || 'Failed to resend OTP', 'error');
+                UI.toast(err.message || 'Login failed. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'Login';
             }
         }
 
         // ── Register flow ─────────────────────────────────────────────
+        // Backend: POST /api/v1/auth/register { name, email, phone, password }
+        // Returns: { success, data: { accessToken, refreshToken, user } }
+
         async function handleRegister() {
             var name = (document.getElementById('regName').value || '').trim();
             var email = (document.getElementById('regEmail').value || '').trim();
@@ -342,19 +277,25 @@
             var btn = document.getElementById('registerBtn');
             var btnText = document.getElementById('registerBtnText');
 
-            if (!name || phone.length !== 10 || password.length < 6) {
-                UI.toast('Please fill all fields correctly. Password must be 6+ chars.', 'error'); return;
+            if (!name || !email || phone.length !== 10 || password.length < 6) {
+                UI.toast('Please fill all fields correctly. Password must be 6+ chars.', 'error');
+                return;
             }
-            btn.disabled = true; btnText.innerText = 'Creating account...';
+
+            btn.disabled = true;
+            btnText.innerText = 'Creating account...';
+
             try {
-                await AUTH.register(name, phone, email, password);
+                // auth.js register(data) expects { name, email, phone, password }
+                await AUTH.register({ name: name, email: email, phone: phone, password: password });
                 UI.toast('Account created! Please log in.', 'success');
                 switchTab('login');
-                document.getElementById('loginPhone').value = phone;
+                document.getElementById('loginEmail').value = email;
             } catch (err) {
                 UI.toast(err.message || 'Registration failed.', 'error');
             } finally {
-                btn.disabled = false; btnText.innerText = 'Create Account';
+                btn.disabled = false;
+                btnText.innerText = 'Create Account';
             }
         }
 
@@ -370,13 +311,9 @@
         window.handleLogin = handleLogin;
         window.handleRegister = handleRegister;
         window.handleLogout = handleLogout;
-        window.moveOtp = moveOtp;
-        window.backOtp = backOtp;
-        window.resendOtp = resendOtp;
 
         // ── Init ─────────────────────────────────────────────────────
         if (!checkAuth()) {
-            // Check URL param to pre-select tab
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tab') === 'register') switchTab('register');
         }

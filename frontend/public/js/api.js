@@ -15,7 +15,7 @@
   'use strict';
 
   var CFG = window.EMS_API_CONFIG || {};
-  var BASE = CFG.BASE_URL || 'https://booking-backend-626o.onrender.com';
+  var BASE = CFG.BASE_URL || 'https://entrymyslot.com';
   var API_PREFIX = CFG.API_BASE || '/api/v1';
   var REFRESH_PATH = '/auth/refresh';
 
