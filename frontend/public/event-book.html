@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Event Tickets - EntryMySlot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    colors: {
+                        custom: {
+                            light: '#f05a28',
+                            dark: '#262626',
+                            darkHover: '#1a1a1a',
+                            lightHover: '#e04c1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::selection { background-color: #f05a28; color: #ffffff; }
+
+        /* QR code styling */
+        .qr-container {
+            background: #fff;
+            border: 3px solid #262626;
+            padding: 12px;
+            display: inline-block;
+            border-radius: 8px;
+        }
+        .qr-container img, .qr-container canvas {
+            display: block;
+            width: 160px;
+            height: 160px;
+        }
+
+        /* Ticket styling */
+        .ticket-item {
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            background: #f9fafb;
+        }
+
+        /* Modal animation */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-custom-dark">
+
+    <!-- Header -->
+    <header class="bg-custom-dark text-white sticky top-0 z-50 shadow-md border-b border-custom-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="events.html" class="flex-shrink-0 flex items-center group">
+                    <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
+                </a>
+                <div class="flex items-center gap-3">
+                    <span id="userNameDisplay" class="hidden sm:block text-sm text-gray-300 font-medium"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Back nav -->
+    <div class="bg-white border-b border-gray-200 sticky top-[56px] sm:top-[64px] z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center">
+            <a href="events.html" class="text-custom-dark hover:text-custom-light transition-colors flex items-center font-bold text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Events
+            </a>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- Left Column: Event Info -->
+            <div class="w-full lg:w-7/12">
+                <div class="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-md mb-6">
+                    <div class="h-64 sm:h-80 md:h-[400px] w-full relative">
+                        <img id="eventImage" src="https://images.unsplash.com/photo-1540039155732-6761b34384b6?q=80&w=1200&auto=format&fit=crop" alt="Event Banner" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 sm:p-8 w-full text-white">
+                            <span class="bg-custom-light text-white text-xs font-bold px-3 py-1 rounded-md mb-3 inline-block shadow-sm" id="eventCategory">Event</span>
+                            <h1 id="eventName" class="text-3xl sm:text-4xl font-bold mb-2 drop-shadow-lg">Loading Event...</h1>
+                            <p id="eventVenue" class="text-sm text-gray-300 font-medium"><i class="fa-solid fa-location-dot mr-1"></i> Loading...</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 sm:p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 border-b border-gray-100 pb-8">
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-custom-light text-xl mr-4 flex-shrink-0 shadow-sm">
+                                    <i class="fa-regular fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Date & Time</p>
+                                    <p id="eventDateTime" class="font-bold text-custom-dark text-base">Loading...</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-custom-light text-xl mr-4 flex-shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Venue</p>
+                                    <p id="eventLocation" class="font-bold text-custom-dark text-base">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-bold text-custom-dark mb-3">About This Event</h3>
+                            <p id="eventDescription" class="text-gray-600 leading-relaxed text-sm font-medium">
+                                Loading event details...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Tickets & Checkout -->
+            <div class="w-full lg:w-5/12">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 sticky top-24 overflow-hidden">
+
+                    <!-- Ticket Selection -->
+                    <div class="p-6 border-b border-gray-100">
+                        <h3 class="text-xl font-bold text-custom-dark mb-6">Select Tickets</h3>
+                        <div id="ticketTypesContainer" class="space-y-4">
+                            <div class="py-8 text-center">
+                                <div class="inline-block w-6 h-6 border-3 border-custom-light border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span class="text-gray-500 font-medium text-sm">Loading tickets...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="bg-custom-dark p-6 text-white relative">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full"></div>
+                        <h4 class="font-bold text-lg mb-4 flex items-center">
+                            <i class="fa-solid fa-receipt mr-2 text-custom-light"></i> Order Summary
+                        </h4>
+
+                        <div class="space-y-2 mb-6 text-sm font-medium border-b border-white/10 pb-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Tickets (<span id="totalTickets">0</span>)</span>
+                                <span id="subtotal">₹0</span>
+                            </div>
+                            <div class="flex justify-between text-green-400 text-xs font-bold">
+                                <span>Entry Fee</span>
+                                <span>FREE</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-end mb-4">
+                            <span class="font-bold text-gray-300">Total</span>
+                            <span class="font-bold text-3xl text-custom-light">FREE</span>
+                        </div>
+
+                        <button id="checkoutBtn" disabled
+                            class="w-full bg-custom-light text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-custom-lightHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            Book Now — Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal — shows booking details + QR -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" id="successModalContent">
+            <div class="p-6 sm:p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-2xl text-custom-dark mb-1">Booking Confirmed!</h3>
+                <p class="text-gray-500 text-sm mb-4">Your tickets have been booked successfully.</p>
+
+                <!-- Booking ID -->
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Booking ID</p>
+                    <p id="modalBookingId" class="font-mono text-sm font-bold text-custom-dark"></p>
+                </div>
+
+                <!-- Ticket count -->
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Tickets</p>
+                    <p id="modalTicketCount" class="font-bold text-custom-dark"></p>
+                </div>
+
+                <!-- QR Code -->
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3">Your QR Ticket</p>
+                    <div class="qr-container mx-auto">
+                        <canvas id="qrCanvas"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Show this at the venue for entry</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button onclick="window.downloadTicketPDF()"
+                        class="flex-1 bg-custom-dark text-white py-3 rounded-xl font-bold text-sm hover:bg-black transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1"></i> Download Ticket
+                    </button>
+                    <button onclick="closeSuccessModal()"
+                        class="flex-1 bg-gray-100 text-custom-dark py-3 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-user-lock text-gray-400 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-custom-dark mb-2">Login Required</h3>
+            <p class="text-sm text-gray-500 mb-6">Please sign in to book tickets for this event.</p>
+            <div class="flex gap-3">
+                <button onclick="closeLoginModal()" class="flex-1 py-2.5 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+                <a id="loginRedirectLink" href="auth.html" class="flex-1 py-2.5 rounded-lg bg-custom-light text-white text-sm font-bold hover:bg-custom-lightHover transition text-center">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-custom-dark text-gray-300 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-gray-500">Copyright 2026 &copy; EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/location-state.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/bookings.js"></script>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+    window.QRCode = {
+      encode: function (text) {
+        // Returns a Promise that resolves to a data URL
+        return new Promise(function (resolve) {
+          QRCode.toDataURL(text, { width: 160, margin: 1, errorCorrectionLevel: 'M' }, function (err, url) {
+            if (err) {
+              console.warn('QR encode error:', err);
+              resolve(null);
+            } else {
+              resolve(url);
+            }
+          });
+        });
+      }
+    };
+    </script>
+
+    <script>
+    'use strict';
+    (function () {
+        var EV = window.EMS_EVENTS;
+        var BK = window.EMS_BOOKINGS;
+        var UI = window.EMS_UI;
+        var AUTH = window.EMS_AUTH;
+
+        var state = {
+            eventId: null,
+            event: null,
+            ticketTypes: [],
+            selectedTickets: {},   // { ticketTypeId: qty }
+            lastBooking: null,     // stores the successful booking for QR/ticket display
+        };
+
+        // ── QR Code (real, via qrcode.js CDN) ────────────────────────
+        // Uses window.QRCode (wraps the qrcode CDN library).
+        // The encoding is async — callers await the Promise.
+
+        async function generateQRDataURL(text) {
+          try {
+            var url = await window.QRCode.encode(text);
+            if (url) return url;
+            // QR library returned null — fall through to SVG fallback
+          } catch (err) {
+            console.warn('QR generation error:', err);
+          }
+          // Fallback: SVG placeholder
+          return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" fill="white"/><rect x="20" y="20" width="120" height="120" fill="black"/><rect x="30" y="30" width="100" height="100" fill="white"/><text x="50" y="85" font-size="8" font-family="monospace">' + UI.escapeHtml(text.substring(0, 16)) + '</text></svg>');
+        }
+
+        async function drawQR(canvasId, dataUrl) {
+          var canvas = document.getElementById(canvasId);
+          if (!canvas) return;
+          var ctx = canvas.getContext('2d');
+          var img = new Image();
+          img.onload = function () {
+            canvas.width = 160;
+            canvas.height = 160;
+            ctx.drawImage(img, 0, 0, 160, 160);
+          };
+          img.src = dataUrl;
+        }
+
+        // ── Modal helpers ────────────────────────────────────────────
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        async function showSuccessModal(booking) {
+            state.lastBooking = booking;
+            var modal = document.getElementById('successModal');
+            var content = document.getElementById('successModalContent');
+
+            // Populate details
+            var bookingId = booking.bookingId || booking._id || 'N/A';
+            document.getElementById('modalBookingId').innerText = String(bookingId).substring(0, 12).toUpperCase();
+
+            var ticketCount = 0;
+            var tickets = booking.tickets || [];
+            if (tickets.length > 0) {
+                ticketCount = tickets.reduce(function (sum, t) { return sum + (t.quantity || 1); }, 0);
+            } else {
+                ticketCount = Object.values(state.selectedTickets).reduce(function (s, q) { return s + q; }, 0);
+            }
+            document.getElementById('modalTicketCount').innerText = ticketCount + ' ticket(s)';
+
+            // Draw QR from first ticket UUID or booking ID
+            var qrData = bookingId;
+            if (tickets.length > 0 && tickets[0].uuid) {
+                qrData = tickets[0].uuid;
+            } else if (tickets.length > 0 && tickets[0].ticketUuid) {
+                qrData = tickets[0].ticketUuid;
+            } else if (tickets.length > 0 && tickets[0]._id) {
+                qrData = tickets[0]._id;
+            }
+
+            // Generate real QR code from ticket UUID
+            try {
+                var qrUrl = await generateQRDataURL(String(qrData));
+                await drawQR('qrCanvas', qrUrl);
+            } catch (qrErr) {
+                // QR generation failed — modal still shows without QR image
+                console.warn('QR generation failed:', qrErr);
+            }
+
+            // Store booking for PDF download
+            modal._bookingId = bookingId;
+
+            // Show modal with animation
+            modal.classList.remove('hidden');
+            requestAnimationFrame(function () {
+                modal.classList.remove('opacity-0');
+            });
+        }
+
+        window.closeSuccessModal = function () {
+            var modal = document.getElementById('successModal');
+            modal.classList.add('opacity-0');
+            setTimeout(function () {
+                modal.classList.add('hidden');
+                // Navigate to my bookings after closing
+                window.location.href = 'my-bookings.html';
+            }, 300);
+        };
+
+        // PDF download — fetches from backend endpoint and triggers browser download
+        window.downloadTicketPDF = async function () {
+            var bookingId = document.getElementById('successModal')._bookingId;
+            if (!bookingId) {
+                UI.toast('No booking found. Please try again.', 'error');
+                return;
+            }
+
+            try {
+                var result = await BK.downloadPdf(bookingId);
+                if (!result.ok) {
+                    UI.toast('Could not download ticket. Please try again.', 'error');
+                    return;
+                }
+
+                // result.data is a Promise that resolves to a Blob
+                var blob = await result.data;
+                if (!blob || blob.size === 0) {
+                    UI.toast('Received empty PDF. Please contact support.', 'error');
+                    return;
+                }
+
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'ticket-' + String(bookingId).substring(0, 12).toUpperCase() + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                UI.toast('Ticket PDF downloaded!', 'success');
+            } catch (err) {
+                console.error('PDF download error:', err);
+                UI.toast('Failed to download PDF. Please try again.', 'error');
+            }
+        };
+
+        // ── Render ticket types from API data ────────────────────────
+
+        function renderTicketTypes() {
+            var container = document.getElementById('ticketTypesContainer');
+            container.innerHTML = '';
+
+            if (!state.ticketTypes || state.ticketTypes.length === 0) {
+                container.innerHTML = '<div class="py-8 text-center text-gray-500 font-medium">No ticket types available for this event.</div>';
+                return;
+            }
+
+            state.ticketTypes.forEach(function (tt) {
+                var typeId = tt._id || tt.id || tt.slug || tt.name;
+                var price = tt.price || 0;
+                var qty = state.selectedTickets[typeId] || 0;
+                var isAvailable = tt.available !== false;
+
+                var wrapper = document.createElement('div');
+                if (!isAvailable) {
+                    wrapper.className = 'flex justify-between items-center p-4 border border-gray-200 rounded-xl bg-gray-50 opacity-60';
+                    wrapper.innerHTML =
+                        '<div><h4 class="font-bold text-gray-400">' + UI.escapeHtml(tt.name) + '</h4>' +
+                        '<p class="text-xs text-gray-400 font-medium mt-0.5">Sold Out</p>' +
+                        '<p class="font-bold text-gray-400 mt-1">₹' + price.toLocaleString('en-IN') + '</p></div>' +
+                        '<span class="text-xs font-bold text-red-400 bg-red-50 px-3 py-1 rounded-md">Sold Out</span>';
+                } else {
+                    wrapper.className = 'flex justify-between items-center p-4 border border-gray-200 rounded-xl bg-gray-50 hover:border-custom-light transition-colors';
+                    wrapper.innerHTML =
+                        '<div><h4 class="font-bold text-custom-dark">' + UI.escapeHtml(tt.name) + '</h4>' +
+                        '<p class="text-xs text-gray-500 font-medium mt-0.5">' + UI.escapeHtml(tt.description || '') + '</p>' +
+                        '<p class="font-bold text-custom-light mt-1">₹' + price.toLocaleString('en-IN') + '</p></div>' +
+                        '<div class="flex items-center bg-white border border-gray-300 rounded-lg shadow-sm">' +
+                            '<button class="qty-minus w-8 h-8 flex items-center justify-center text-gray-500 hover:text-custom-dark hover:bg-gray-100 rounded-l-lg transition" data-ttid="' + typeId + '">-</button>' +
+                            '<span class="qty-display w-8 text-center font-bold text-sm" data-ttid="' + typeId + '">' + qty + '</span>' +
+                            '<button class="qty-plus w-8 h-8 flex items-center justify-center text-gray-500 hover:text-custom-dark hover:bg-gray-100 rounded-r-lg transition" data-ttid="' + typeId + '">+</button>' +
+                        '</div>';
+                }
+                container.appendChild(wrapper);
+            });
+
+            // Attach quantity handlers
+            container.querySelectorAll('.qty-minus').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var ttId = this.dataset.ttid;
+                    updateTicketQty(ttId, -1);
+                });
+            });
+            container.querySelectorAll('.qty-plus').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var ttId = this.dataset.ttid;
+                    updateTicketQty(ttId, 1);
+                });
+            });
+        }
+
+        function updateTicketQty(typeId, change) {
+            var current = state.selectedTickets[typeId] || 0;
+            var newQty = current + change;
+            if (newQty < 0 || newQty > 10) return;
+
+            state.selectedTickets[typeId] = newQty;
+
+            var display = document.querySelector('.qty-display[data-ttid="' + typeId + '"]');
+            if (display) display.innerText = newQty;
+
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            var totalQty = 0;
+            state.ticketTypes.forEach(function (tt) {
+                var typeId = tt._id || tt.id || tt.slug || tt.name;
+                totalQty += state.selectedTickets[typeId] || 0;
+            });
+
+            document.getElementById('totalTickets').innerText = totalQty;
+            document.getElementById('subtotal').innerText = '₹0';
+
+            var btn = document.getElementById('checkoutBtn');
+            if (totalQty > 0) {
+                btn.disabled = false;
+                btn.innerText = 'Book Now — Free';
+                btn.onclick = function () { initiateBooking(); };
+            } else {
+                btn.disabled = true;
+                btn.innerText = 'Select Tickets';
+                btn.onclick = null;
+            }
+        }
+
+        // ── Booking Flow (FREE — no payment) ─────────────────────────
+
+        function initiateBooking() {
+            if (!AUTH.isLoggedIn()) {
+                // Set return URL so auth can redirect back
+                sessionStorage.setItem('ems_return_url', window.location.href);
+                openLoginModal();
+                return;
+            }
+
+            var btn = document.getElementById('checkoutBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> Booking...';
+
+            // Build ticket array: [{ ticketTypeId, quantity }]
+            var tickets = [];
+            state.ticketTypes.forEach(function (tt) {
+                var typeId = tt._id || tt.id || tt.slug || tt.name;
+                var qty = state.selectedTickets[typeId] || 0;
+                if (qty > 0) {
+                    tickets.push({ ticketTypeId: typeId, quantity: qty });
+                }
+            });
+
+            // Build attendee details from current user
+            var user = AUTH.getUser();
+            var attendees = [];
+            tickets.forEach(function (t) {
+                for (var i = 0; i < t.quantity; i++) {
+                    attendees.push({
+                        name: (user && user.name) || '',
+                        email: (user && user.email) || '',
+                        phone: (user && user.phone) || '',
+                    });
+                }
+            });
+
+            // POST /api/v1/events/bookings — events are FREE, no payment step
+            var bookingData = {
+                eventId: state.eventId,
+                tickets: tickets,
+                attendeeDetails: attendees,
+            };
+
+            EV.createBooking(bookingData).then(function (result) {
+                if (result.ok) {
+                    var booking = result.data.data || result.data;
+                    showSuccessModal(booking).then(function () {
+                        UI.toast('Booking confirmed! Check your tickets below.', 'success');
+                    }).catch(function (err) {
+                        console.error('Modal error:', err);
+                        UI.toast('Booking confirmed but could not show details.', 'warning');
+                    });
+                } else {
+                    var errMsg = (result.data && result.data.message) || 'Booking failed. Please try again.';
+                    UI.toast(errMsg, 'error');
+                    resetBookingBtn();
+                }
+            }).catch(function (err) {
+                UI.toast(err.message || 'Something went wrong. Please try again.', 'error');
+                resetBookingBtn();
+            });
+        }
+
+        function resetBookingBtn() {
+            var btn = document.getElementById('checkoutBtn');
+            btn.disabled = false;
+            btn.innerText = 'Book Now — Free';
+            btn.onclick = function () { initiateBooking(); };
+            calculateTotals();
+        }
+
+        // ── Event Data ───────────────────────────────────────────────
+
+        async function loadEvent(eventId) {
+            var container = document.getElementById('ticketTypesContainer');
+            container.innerHTML = '<div class="py-8 text-center"><div class="inline-block w-6 h-6 border-3 border-custom-light border-t-transparent rounded-full animate-spin mr-2"></div><span class="text-gray-500 font-medium text-sm">Loading event...</span></div>';
+
+            try {
+                var result = await EV.getEvent(eventId);
+                if (result.ok) {
+                    state.event = result.data.data || result.data;
+                    state.eventId = state.event._id || state.event.id || state.eventId;
+                    state.ticketTypes = state.event.ticketTypes || state.event.tickets || [];
+
+                    // Populate event info
+                    document.getElementById('eventName').innerText = state.event.title || 'Event';
+                    if (state.event.category) {
+                        document.getElementById('eventCategory').innerText = state.event.category;
+                    }
+                    if (state.event.venue) {
+                        document.getElementById('eventVenue').innerHTML = '<i class="fa-solid fa-location-dot mr-1"></i> ' + UI.escapeHtml(state.event.venue);
+                        document.getElementById('eventLocation').innerText = state.event.venue;
+                    } else if (state.event.location) {
+                        document.getElementById('eventVenue').innerHTML = '<i class="fa-solid fa-location-dot mr-1"></i> ' + UI.escapeHtml(state.event.location);
+                        document.getElementById('eventLocation').innerText = state.event.location;
+                    }
+                    var dateStr = state.event.date || state.event.startDate || '';
+                    var timeStr = state.event.time || state.event.startTime || '';
+                    if (dateStr) {
+                        document.getElementById('eventDateTime').innerText = dateStr + (timeStr ? ' | ' + timeStr : '');
+                    }
+                    if (state.event.image || state.event.bannerImage || state.event.posterImage) {
+                        document.getElementById('eventImage').src = state.event.image || state.event.bannerImage || state.event.posterImage;
+                    }
+                    if (state.event.description) {
+                        document.getElementById('eventDescription').innerText = state.event.description;
+                    }
+
+                    renderTicketTypes();
+                    calculateTotals();
+                } else {
+                    container.innerHTML = '<div class="py-8 text-center text-red-400 font-medium">Failed to load event. <br><button onclick="window.reloadEvent()" class="text-custom-light underline mt-2">Try Again</button></div>';
+                }
+            } catch (err) {
+                container.innerHTML = '<div class="py-8 text-center text-red-400 font-medium">Network error loading event. <br><button onclick="window.reloadEvent()" class="text-custom-light underline mt-2">Try Again</button></div>';
+            }
+        }
+
+        window.reloadEvent = function () {
+            if (state.eventId) loadEvent(state.eventId);
+        };
+
+        // ── Init ─────────────────────────────────────────────────────
+
+        function init() {
+            var urlParams = new URLSearchParams(window.location.search);
+
+            // Read event ID from URL
+            state.eventId = urlParams.get('eventId') || urlParams.get('id') || '';
+
+            // Check if returning from login (redirect-back flow)
+            var returnUrl = sessionStorage.getItem('ems_return_url');
+            if (returnUrl) {
+                sessionStorage.removeItem('ems_return_url');
+                // If user is now logged in, we're back from auth
+                if (AUTH.isLoggedIn() && state.eventId) {
+                    // Load the event data
+                    loadEvent(state.eventId);
+                    return;
+                }
+            }
+
+            // Populate basic info from URL params (fallback)
+            var name = urlParams.get('name') || 'Exclusive Live Event';
+            var location = urlParams.get('location') || 'Main Arena, Coimbatore';
+            var date = urlParams.get('date') || '';
+            var time = urlParams.get('time') || '';
+            var image = urlParams.get('image') || '';
+
+            document.getElementById('eventName').innerText = name;
+            document.getElementById('eventLocation').innerText = location;
+            if (date) {
+                document.getElementById('eventDateTime').innerText = date + (time ? ' | ' + time : '');
+            }
+            if (image) document.getElementById('eventImage').src = image;
+
+            // Load event data from API if we have an ID
+            if (state.eventId) {
+                loadEvent(state.eventId);
+            } else {
+                // No event ID — render with default ticket types as fallback
+                state.ticketTypes = [
+                    { _id: 'general', name: 'General Admission', description: 'Entry to the main viewing area.', price: 0 },
+                    { _id: 'vip', name: 'VIP Pass', description: 'Front row seats + meet & greet.', price: 0 }
+                ];
+                renderTicketTypes();
+                calculateTotals();
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>

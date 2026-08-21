@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Portal - EntryMySlot</title>
+    <meta name="description" content="Business owner dashboard for EntryMySlot organizers.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f05a28',
+                        'primary-hover': '#e04c1a',
+                        'primary-light': 'rgba(240,90,40,0.08)',
+                        dark: '#262626',
+                        'dark-light': 'rgba(38,38,38,0.06)',
+                        offwhite: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(38,38,38,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(38,38,38,0.4); }
+
+        .page-view { display: none; animation: fadeIn 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .page-view.active { display: block; }
+        .hidden-view { display: none !important; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:translateY(0);} }
+
+        .theme-turf .dynamic-text { color: #10B981; }
+        .theme-turf .dynamic-bg { background-color: #10B981; }
+        .theme-turf .dynamic-light-bg { background-color: #D1FAE5; }
+        .theme-cinema .dynamic-text { color: #8B5CF6; }
+        .theme-cinema .dynamic-bg { background-color: #8B5CF6; }
+        .theme-cinema .dynamic-light-bg { background-color: #EDE9FE; }
+    </style>
+</head>
+<body class="bg-offwhite text-dark font-sans overflow-x-hidden antialiased">
+
+    <!-- ========== AUTH VIEW ========== -->
+    <div id="auth-view" class="min-h-screen w-full flex bg-white">
+        <div class="hidden lg:flex w-1/2 bg-dark flex-col justify-center items-center p-12 relative overflow-hidden text-white">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/20 via-dark to-dark"></div>
+            <div class="relative z-10 text-center max-w-lg">
+                <div class="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center text-4xl font-black mb-8 mx-auto shadow-2xl shadow-primary/30">E</div>
+                <h1 class="text-4xl font-bold mb-4 tracking-tight">Business Owner Portal</h1>
+                <p class="text-gray-400 text-lg leading-relaxed">Track your revenue, monitor bookings, and manage payouts across all your listed properties on EntryMySlot.</p>
+            </div>
+        </div>
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+            <div class="w-full max-w-md">
+                <div class="lg:hidden flex justify-center mb-8">
+                    <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary/30">E</div>
+                </div>
+                <div class="mb-10">
+                    <h2 class="text-3xl font-bold text-dark mb-2 tracking-tight">Owner Sign In</h2>
+                    <p class="text-slate-500 font-medium">Access your business analytics and payouts.</p>
+                </div>
+                <form id="login-form" class="space-y-5">
+                    <div id="login-error" class="hidden-view bg-red-50 border border-red-100 text-red-600 text-sm p-4 rounded-xl font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="login-error-msg">Invalid credentials.</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
+                        <input type="email" id="login-email" placeholder="owner@business.com" required autocomplete="email" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium bg-slate-50 focus:bg-white text-dark">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Password</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-medium bg-slate-50 focus:bg-white text-dark">
+                    </div>
+                    <button type="submit" id="login-submit-btn" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-primary/25 mt-2">
+                        Access Business Portal
+                    </button>
+                    <p class="text-xs text-center text-slate-400 mt-3">Use your organizer credentials to sign in.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DASHBOARD VIEW ========== -->
+    <div id="dashboard-view" class="hidden-view flex h-screen overflow-hidden bg-offwhite">
+
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-40 lg:hidden hidden-view" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-slate-200 flex flex-col z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out h-full overflow-y-auto">
+            <div class="p-6 flex items-center gap-3 border-b border-slate-100">
+                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-md shadow-primary/20">E</div>
+                <div>
+                    <div class="text-lg font-bold tracking-tight text-dark">Entry<span class="text-primary">MySlot</span></div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-0.5">Owner Portal</div>
+                </div>
+                <button class="lg:hidden ml-auto p-2 text-slate-400 hover:bg-slate-100 rounded-lg" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Business Switcher -->
+            <div class="p-4">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div id="business-icon-container" class="w-10 h-10 rounded-lg dynamic-light-bg dynamic-text flex items-center justify-center">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p id="sidebar-business-name" class="text-sm font-bold text-dark truncate">Loading...</p>
+                            <p id="sidebar-business-type" class="text-[11px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Business</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium active bg-primary/10 text-primary font-semibold" data-target="overview-page" onclick="navigateTo(event, 'overview-page')">
+                    <i class="fa-solid fa-grip w-5 text-center"></i>
+                    Business Overview
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="financials-page" onclick="navigateTo(event, 'financials-page')">
+                    <i class="fa-solid fa-receipt w-5 text-center"></i>
+                    Financials &amp; Payouts
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="staff-page" onclick="navigateTo(event, 'staff-page')">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    Staff &amp; Managers
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="venues-page" onclick="navigateTo(event, 'venues-page')">
+                    <i class="fa-solid fa-location-dot w-5 text-center"></i>
+                    My Venues
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="events-page" onclick="navigateTo(event, 'events-page')">
+                    <i class="fa-solid fa-calendar-star w-5 text-center"></i>
+                    My Events
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="movies-page" onclick="navigateTo(event, 'movies-page')">
+                    <i class="fa-solid fa-film w-5 text-center"></i>
+                    Movies &amp; Cinemas
+                </a>
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2 mt-6">Configuration</div>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-dark transition-all font-medium" data-target="settings-page" onclick="navigateTo(event, 'settings-page')">
+                    <i class="fa-solid fa-gear w-5 text-center"></i>
+                    Business Profile
+                </a>
+            </nav>
+
+            <!-- User Profile & Logout -->
+            <div class="p-4 border-t border-slate-100">
+                <div class="flex items-center gap-3 px-2">
+                    <div class="w-10 h-10 rounded-full bg-dark text-white flex items-center justify-center font-bold shadow-md" id="owner-avatar">OW</div>
+                    <div class="flex-1 min-w-0">
+                        <p id="user-name" class="text-sm font-bold text-dark truncate">Owner</p>
+                        <p class="text-xs text-slate-500 truncate">Organizer Account</p>
+                    </div>
+                    <button id="logout-btn" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Logout" onclick="handleLogout()">
+                        <i class="fa-solid fa-arrow-right-from-bracket w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-600 p-2 -ml-2 rounded-xl hover:bg-slate-100" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-bars w-6 h-5"></i>
+                    </button>
+                    <div>
+                        <h1 id="top-bar-title" class="text-2xl font-bold tracking-tight text-dark leading-tight">Business Overview</h1>
+                        <p id="top-bar-subtitle" class="text-sm font-medium text-slate-500 mt-0.5">Real-time metrics for your property.</p>
+                    </div>
+                </div>
+                <div class="hidden sm:block text-right">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Date</p>
+                    <p class="text-sm font-bold text-dark" id="today-date"></p>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-8">
+
+                <!-- Overview Page -->
+                <div id="overview-page" class="page-view active max-w-7xl mx-auto">
+                    <div id="overview-metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm col-span-full flex items-center justify-center py-12">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-3"></i>
+                            <span class="text-slate-500 text-sm font-medium">Loading dashboard data...</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h3 id="recent-bookings-title" class="text-lg font-bold text-dark">Recent Bookings</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead id="recent-table-head" class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200"></thead>
+                                    <tbody id="recent-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                                </table>
+                            </div>
+                            <div class="p-4 border-t border-slate-100 bg-slate-50 text-center">
+                                <span class="text-primary font-bold text-sm">Live data from backend</span>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div id="top-performers-card" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                                <h4 id="dynamic-segment-title" class="font-bold text-dark mb-4 border-b border-slate-100 pb-2">Top Performers</h4>
+                                <div id="top-performers-content" class="text-sm text-slate-400 text-center py-6">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financials Page -->
+                <div id="financials-page" class="page-view max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-dark">Financials &amp; Payouts</h2>
+                        <p class="text-slate-500 text-sm mt-1">Track money settled to your bank account vs pending with the platform.</p>
+                    </div>
+                    <div id="settlements-container">
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading settlement data...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Page -->
+                <div id="staff-page" class="page-view max-w-7xl mx-auto">
+                    <div class="mb-8 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-2xl font-bold text-dark">Staff &amp; Managers</h2>
+                            <p class="text-slate-500 text-sm mt-1">View managers handling your daily operations.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="staff-list-container">
+                        <div class="text-center py-12 col-span-full">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading staff data...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Venues Page -->
+                <div id="venues-page" class="page-view max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-dark">My Venues</h2>
+                        <p class="text-slate-500 text-sm mt-1">Manage your listed sports venues and grounds.</p>
+                    </div>
+                    <div id="venues-container">
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading venues...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events Page -->
+                <div id="events-page" class="page-view max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-dark">My Events</h2>
+                        <p class="text-slate-500 text-sm mt-1">Manage your listed events and shows.</p>
+                    </div>
+                    <div id="events-container">
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading events...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Movies Page -->
+                <div id="movies-page" class="page-view max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-dark">Movies &amp; Cinemas</h2>
+                        <p class="text-slate-500 text-sm mt-1">Manage your cinemas, screens, movies, and showtimes.</p>
+                    </div>
+                    <div id="movies-container">
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading cinemas...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settings-page" class="page-view max-w-3xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-dark">Business Profile</h2>
+                        <p class="text-slate-500 text-sm mt-1">Information displayed on the main booking website.</p>
+                    </div>
+                    <div id="settings-container" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+                        <div class="text-center py-8">
+                            <i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i>
+                            <span class="text-slate-500 text-sm">Loading profile...</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    'use strict';
+    (function () {
+        var AUTH = window.EMS_AUTH;
+        var API  = window.EMS_API;
+        var UI   = window.EMS_UI;
+
+        // ── State ────────────────────────────────────────────────────
+        var organizerData = null;   // organization info
+        var currentPage   = 'overview-page';
+
+        // ── Helpers ──────────────────────────────────────────────────
+        function esc(s) {
+            if (s == null) return '';
+            return String(s).replace(/[&<>"']/g, function(c) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+            });
+        }
+
+        function fmtCurrency(n) {
+            if (n == null || isNaN(n)) return '₹0';
+            return '₹' + Number(n).toLocaleString('en-IN');
+        }
+
+        function fmtDate(d) {
+            if (!d) return 'N/A';
+            var dt = new Date(d);
+            if (isNaN(dt)) return String(d);
+            return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function fmtDateTime(d) {
+            if (!d) return 'N/A';
+            var dt = new Date(d);
+            if (isNaN(dt)) return String(d);
+            return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ', ' +
+                   dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ── Organizer Token Injection ────────────────────────────────
+        function getOrganizerToken() {
+            return localStorage.getItem('ems_organizer_token');
+        }
+
+        function injectOrganizerToken() {
+            var tok = getOrganizerToken();
+            if (!tok) return;
+            var origGet = API.get;
+            var origPost = API.post;
+            var origPut = API.put;
+            var origPatch = API.patch;
+            var origDel = API.del;
+
+            function withToken(headers) {
+                headers = headers || {};
+                headers['Authorization'] = 'Bearer ' + tok;
+                return headers;
+            }
+
+            API.get = function(path, opts) {
+                opts = opts || {};
+                opts.headers = withToken(opts.headers);
+                return origGet(path, opts);
+            };
+            API.post = function(path, body, opts) {
+                opts = opts || {};
+                opts.headers = withToken(opts.headers);
+                return origPost(path, body, opts);
+            };
+            API.put = function(path, body, opts) {
+                opts = opts || {};
+                opts.headers = withToken(opts.headers);
+                return origPut(path, body, opts);
+            };
+            API.patch = function(path, body, opts) {
+                opts = opts || {};
+                opts.headers = withToken(opts.headers);
+                return origPatch(path, body, opts);
+            };
+            API.del = function(path, opts) {
+                opts = opts || {};
+                opts.headers = withToken(opts.headers);
+                return origDel(path, opts);
+            };
+        }
+
+        // ── Login ────────────────────────────────────────────────────
+        async function handleLogin(email, password) {
+            var btn = document.getElementById('login-submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Signing in...';
+
+            var result = await AUTH.organizerLogin(email, password);
+            if (result.ok && result.data && result.data.success) {
+                injectOrganizerToken();
+                organizerData = result.data.data || result.data;
+                document.getElementById('auth-view').classList.add('hidden-view');
+                document.getElementById('dashboard-view').classList.remove('hidden-view');
+                await initDashboard();
+            } else {
+                var errEl = document.getElementById('login-error');
+                errEl.classList.remove('hidden-view');
+                document.getElementById('login-error-msg').textContent =
+                    (result.data && result.data.message) || 'Invalid credentials. Please try again.';
+            }
+            btn.disabled = false;
+            btn.innerHTML = 'Access Business Portal';
+        }
+
+        function handleLogout() {
+            AUTH.organizerLogout();
+            organizerData = null;
+            location.reload();
+        }
+
+        // ── Navigation ───────────────────────────────────────────────
+        function navigateTo(e, pageId) {
+            if (e) e.preventDefault();
+            currentPage = pageId;
+
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(function(nav) {
+                nav.classList.remove('bg-primary/10', 'text-primary', 'font-semibold');
+                nav.classList.add('text-slate-600');
+            });
+            var activeNav = document.querySelector('[data-target="' + pageId + '"]');
+            if (activeNav) {
+                activeNav.classList.add('bg-primary/10', 'text-primary', 'font-semibold');
+                activeNav.classList.remove('text-slate-600');
+                var titleText = activeNav.textContent.trim();
+                document.getElementById('top-bar-title').textContent = titleText;
+            }
+
+            // Switch page views
+            document.querySelectorAll('.page-view').forEach(function(p) {
+                p.classList.remove('active');
+            });
+            var target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+
+            // Load page data on first visit
+            if (pageId === 'financials-page') loadSettlements();
+            else if (pageId === 'staff-page') loadManagers();
+            else if (pageId === 'venues-page') loadVenues();
+            else if (pageId === 'events-page') loadEvents();
+            else if (pageId === 'movies-page') loadMovies();
+            else if (pageId === 'settings-page') loadSettings();
+
+            // Close mobile sidebar
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden-view');
+        }
+
+        // ── Dashboard Init ───────────────────────────────────────────
+        async function initDashboard() {
+            if (!getOrganizerToken()) return;
+            injectOrganizerToken();
+
+            // Set today's date
+            document.getElementById('today-date').textContent =
+                new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Set user info
+            if (organizerData) {
+                var name = organizerData.name || organizerData.ownerName || 'Owner';
+                document.getElementById('user-name').textContent = name;
+                document.getElementById('owner-avatar').textContent = name.substring(0,2).toUpperCase();
+                var bizName = organizerData.businessName || organizerData.organizationName || organizerData.name || 'My Business';
+                document.getElementById('sidebar-business-name').textContent = bizName;
+            }
+
+            // Detect business type
+            var bType = organizerData && organizerData.businessType ? organizerData.businessType.toLowerCase() : 'turf';
+            if (bType.indexOf('cinema') !== -1 || bType.indexOf('movie') !== -1) {
+                document.getElementById('sidebar-business-type').textContent = 'Cinema Business';
+            } else {
+                document.getElementById('sidebar-business-type').textContent = 'Turf Business';
+            }
+
+            await loadDashboardStats();
+        }
+
+        // ── Overview: Dashboard Stats ────────────────────────────────
+        async function loadDashboardStats() {
+            var metricsEl = document.getElementById('overview-metrics');
+            var tableHead = document.getElementById('recent-table-head');
+            var tableBody = document.getElementById('recent-table-body');
+            var topContent = document.getElementById('top-performers-content');
+
+            metricsEl.innerHTML = '<div class="col-span-full text-center py-8"><i class="fa-solid fa-spinner fa-spin text-primary mr-2"></i><span class="text-slate-500 text-sm">Loading overview...</span></div>';
+
+            var result = await API.get('/owner/dashboard');
+            if (!result.ok || !result.data || !result.data.success) {
+                renderDashboardFallback(metricsEl, tableHead, tableBody, topContent);
+                return;
+            }
+
+            var d = result.data.data || {};
+            var metrics = [];
+            var headers = ['Booking', 'Customer', 'Amount', 'Date', 'Status'];
+            var rows = [];
+            var topHtml = '<p class="text-sm text-slate-400">No data yet.</p>';
+
+            // Determine business type from data
+            var bizType = 'turf';
+            if (d.recentBookings && d.recentBookings.length > 0) {
+                var first = d.recentBookings[0];
+                if (first.venueType === 'cinema' || first.type === 'cinema' || first.cinemaName) bizType = 'cinema';
+            }
+
+            if (bizType === 'cinema') {
+                document.getElementById('sidebar-business-type').textContent = 'Cinema Business';
+                metrics = [
+                    { label: 'Box Office (Today)', value: fmtCurrency(d.todayRevenue), sub: '+12% vs yesterday' },
+                    { label: 'Tickets Sold', value: d.todayTickets ? String(d.todayTickets) : '0', sub: d.occupancyRate ? d.occupancyRate + '% occupancy' : '' },
+                    { label: 'Active Shows', value: d.activeShows ? String(d.activeShows) : '0', sub: 'Currently running' },
+                    { label: 'Platform Comm.', value: fmtCurrency(d.platformCommission), sub: '5% standard rate' }
+                ];
+                headers = ['Showtime', 'Screen', 'Tickets', 'Amount', 'Status'];
+                if (d.topMovies) {
+                    topHtml = d.topMovies.map(function(m) {
+                        return '<div class="flex justify-between items-center pb-3 border-b border-slate-100 last:border-0"><span class="font-bold text-dark text-sm">' + esc(m.title || m.name) + '</span><span class="text-sm font-black text-violet-500">' + fmtCurrency(m.revenue) + '</span></div>';
+                    }).join('');
+                }
+            } else {
+                document.getElementById('sidebar-business-type').textContent = 'Turf Business';
+                metrics = [
+                    { label: 'Revenue (Today)', value: fmtCurrency(d.todayRevenue), sub: '+15% vs yesterday' },
+                    { label: 'Slots Booked', value: d.slotsBooked ? d.slotsBooked + '/' + d.totalSlots : '0', sub: d.utilizationRate ? d.utilizationRate + '% utilization' : '' },
+                    { label: 'Active Grounds', value: d.activeGrounds ? String(d.activeGrounds) : '0', sub: 'Listed properties' },
+                    { label: 'Platform Comm.', value: fmtCurrency(d.platformCommission), sub: '5% standard rate' }
+                ];
+                headers = ['Slot Time', 'Ground', 'Customer', 'Amount', 'Status'];
+                if (d.topVenues) {
+                    topHtml = d.topVenues.map(function(v) {
+                        return '<div class="flex justify-between items-center pb-3 border-b border-slate-100 last:border-0"><span class="font-bold text-dark text-sm">' + esc(v.name) + '</span><span class="text-sm font-black text-emerald-500">' + fmtCurrency(v.revenue) + '</span></div>';
+                    }).join('');
+                }
+            }
+
+            // Render metrics
+            metricsEl.innerHTML = metrics.map(function(m) {
+                return '<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-colors"><div class="absolute top-0 right-0 w-16 h-1 dynamic-bg rounded-bl-lg"></div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">' + esc(m.label) + '</p><h3 class="text-2xl font-black text-dark tracking-tight">' + esc(m.value) + '</h3>' + (m.sub ? '<p class="text-xs text-slate-500 mt-2 font-medium">' + esc(m.sub) + '</p>' : '') + '</div>';
+            }).join('');
+
+            // Render recent bookings table
+            tableHead.innerHTML = '<tr>' + headers.map(function(h) { return '<th class="py-4 px-6 font-semibold">' + esc(h) + '</th>'; }).join('') + '</tr>';
+            var recent = d.recentBookings || [];
+            if (recent.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-400 text-sm">No recent bookings found.</td></tr>';
+            } else {
+                tableBody.innerHTML = recent.slice(0, 10).map(function(b) {
+                    var statusClass = b.status === 'confirmed' || b.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                      b.status === 'pending_payment' || b.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                                      b.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600';
+                    if (bizType === 'cinema') {
+                        return '<tr class="hover:bg-slate-50 transition-colors"><td class="py-3 px-6 font-bold text-dark whitespace-nowrap">' + esc(b.showtime || b.time || 'N/A') + '</td><td class="py-3 px-6 text-slate-600 whitespace-nowrap">' + esc(b.screen || b.cinema || 'N/A') + '</td><td class="py-3 px-6 whitespace-nowrap">' + esc(b.movie || '') + '</td><td class="py-3 px-6 font-black text-dark whitespace-nowrap">' + fmtCurrency(b.totalAmount || b.amount) + '</td><td class="py-3 px-6 whitespace-nowrap"><span class="' + statusClass + ' px-2 py-1 rounded-md text-xs font-bold">' + esc(b.status || 'unknown') + '</span></td></tr>';
+                    }
+                    return '<tr class="hover:bg-slate-50 transition-colors"><td class="py-3 px-6 font-bold text-dark whitespace-nowrap">' + esc(b.time || b.slotTime || 'N/A') + '</td><td class="py-3 px-6 text-slate-600 whitespace-nowrap">' + esc(b.groundName || b.venueName || 'N/A') + '</td><td class="py-3 px-6 text-slate-600 whitespace-nowrap">' + esc(b.customerName || b.userName || 'Guest') + '</td><td class="py-3 px-6 font-black text-dark whitespace-nowrap">' + fmtCurrency(b.totalAmount || b.amount) + '</td><td class="py-3 px-6 whitespace-nowrap"><span class="' + statusClass + ' px-2 py-1 rounded-md text-xs font-bold">' + esc(b.status || 'unknown') + '</span></td></tr>';
+                }).join('');
+            }
+
+            // Top performers
+            document.getElementById('dynamic-segment-title').textContent = bizType === 'cinema' ? 'Top Box Office Movies' : 'Top Performing Turf';
+            topContent.innerHTML = topHtml;
+
+            // Apply theme
+            document.body.classList.remove('theme-turf', 'theme-cinema');
+            document.body.classList.add('theme-' + bizType);
+        }
+
+        function renderDashboardFallback(metricsEl, tableHead, tableBody, topContent) {
+            metricsEl.innerHTML = '<div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center"><i class="fa-solid fa-triangle-exclamation text-amber-500 text-2xl mb-3"></i><p class="text-slate-500 text-sm">Could not load dashboard stats. Make sure the backend is running.</p></div>';
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+            topContent.innerHTML = '<p class="text-sm text-slate-400">No data available.</p>';
+        }
+
+        // ── Financials: Settlements ──────────────────────────────────
+        async function loadSettlements() {
+            var container = document.getElementById('settlements-container');
+            container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading settlements...</span></div>';
+
+            var result = await API.get('/owner/settlements');
+            if (!result.ok || !result.data || !result.data.success) {
+                container.innerHTML = '<div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-12 text-center"><i class="fa-solid fa-receipt text-slate-300 text-4xl mb-4"></i><h3 class="text-lg font-bold text-dark mb-2">Settlement Data</h3><p class="text-slate-500 text-sm">No settlement records found.</p></div>';
+                return;
+            }
+
+            var settlements = result.data.data || result.data;
+            if (!Array.isArray(settlements)) settlements = settlements.settlements || settlements.data || [];
+
+            if (settlements.length === 0) {
+                container.innerHTML = '<div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-12 text-center"><i class="fa-solid fa-receipt text-slate-300 text-4xl mb-4"></i><h3 class="text-lg font-bold text-dark mb-2">No Settlements Yet</h3><p class="text-slate-500 text-sm">Settlements will appear here once payouts are processed.</p></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200"><tr><th class="py-4 px-6 font-semibold">Period</th><th class="py-4 px-6 font-semibold">Amount</th><th class="py-4 px-6 font-semibold">Status</th><th class="py-4 px-6 font-semibold">Date</th></tr></thead><tbody class="divide-y divide-slate-100">' + settlements.map(function(s) {
+                var statusBadge = s.status === 'completed' || s.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                  s.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600';
+                return '<tr class="hover:bg-slate-50 transition-colors"><td class="py-4 px-6 font-medium text-sm">' + esc(s.period || s.month || 'N/A') + '</td><td class="py-4 px-6 font-black text-dark text-sm">' + fmtCurrency(s.amount || s.settledAmount) + '</td><td class="py-4 px-6"><span class="' + statusBadge + ' px-2 py-1 rounded-md text-xs font-bold">' + esc(s.status || 'unknown') + '</span></td><td class="py-4 px-6 text-slate-500 text-sm">' + fmtDate(s.date || s.createdAt || s.processedAt) + '</td></tr>';
+            }).join('') + '</tbody></table></div></div>';
+        }
+
+        // ── Staff: Managers ──────────────────────────────────────────
+        async function loadManagers() {
+            var container = document.getElementById('staff-list-container');
+            container.innerHTML = '<div class="col-span-full text-center py-8"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading managers...</span></div>';
+
+            var result = await API.get('/owner/managers');
+            if (!result.ok || !result.data || !result.data.success) {
+                container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm">Could not load managers.</div>';
+                return;
+            }
+
+            var managers = result.data.data || result.data;
+            if (!Array.isArray(managers)) managers = managers.managers || managers.data || [];
+
+            if (managers.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm">No managers assigned yet.</div>';
+                return;
+            }
+
+            container.innerHTML = managers.map(function(m) {
+                var initials = (m.name || 'M').substring(0,2).toUpperCase();
+                var isActive = m.isActive !== false;
+                var statusBadge = isActive ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs font-bold">Active</span>' : '<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-bold">Inactive</span>';
+                return '<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-600">' + esc(initials) + '</div><div class="flex-1"><h4 class="font-bold text-dark text-sm">' + esc(m.name) + '</h4><p class="text-xs text-slate-500">' + esc(m.email || '') + (m.phone ? ' &bull; ' + esc(m.phone) : '') + '</p><div class="mt-1">' + statusBadge + '</div></div></div>';
+            }).join('');
+        }
+
+        // ── Venues ───────────────────────────────────────────────────
+        async function loadVenues() {
+            var container = document.getElementById('venues-container');
+            container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading venues...</span></div>';
+
+            var result = await API.get('/turf/organizer/venues');
+            if (!result.ok || !result.data || !result.data.success) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400 text-sm">Could not load venues. Make sure the backend is running.</div>';
+                return;
+            }
+
+            var venues = result.data.data || result.data;
+            if (!Array.isArray(venues)) venues = venues.venues || venues.data || [];
+
+            if (venues.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-location-dot text-slate-300 text-4xl mb-4"></i><p class="text-slate-500 text-sm">No venues listed yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + venues.map(function(v) {
+                return '<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"><div class="flex items-start justify-between mb-3"><div><h4 class="font-bold text-dark">' + esc(v.name) + '</h4><p class="text-xs text-slate-500 mt-1">' + esc(v.sport || v.sportType || 'Multi-sport') + '</p></div><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-bold">' + esc(v.status || 'active') + '</span></div><p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1 text-primary"></i>' + esc(v.city || v.location || 'N/A') + '</p><p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-indian-rupee-sign mr-1 text-primary"></i>' + (v.pricePerSlot ? '₹' + Number(v.pricePerSlot).toLocaleString('en-IN') + '/slot' : 'Price on request') + '</p></div>';
+            }).join('') + '</div>';
+        }
+
+        // ── Events ───────────────────────────────────────────────────
+        async function loadEvents() {
+            var container = document.getElementById('events-container');
+            container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading events...</span></div>';
+
+            var result = await API.get('/organizer/events');
+            if (!result.ok || !result.data || !result.data.success) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400 text-sm">Could not load events.</div>';
+                return;
+            }
+
+            var events = result.data.data || result.data;
+            if (!Array.isArray(events)) events = events.events || events.data || [];
+
+            if (events.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-calendar text-slate-300 text-4xl mb-4"></i><p class="text-slate-500 text-sm">No events listed yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + events.map(function(ev) {
+                return '<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"><div class="h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"><i class="fa-solid fa-calendar-star text-primary/30 text-5xl"></i></div><div class="p-5"><h4 class="font-bold text-dark">' + esc(ev.name || ev.title) + '</h4><p class="text-xs text-slate-500 mt-1">' + esc(ev.category || ev.eventType || 'General') + '</p><div class="flex items-center justify-between mt-3"><span class="text-xs text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>' + fmtDate(ev.date || ev.eventDate) + '</span><span class="text-xs font-bold text-primary">' + fmtCurrency(ev.price || ev.ticketPrice) + '</span></div></div></div>';
+            }).join('') + '</div>';
+        }
+
+        // ── Movies & Cinemas ─────────────────────────────────────────
+        async function loadMovies() {
+            var container = document.getElementById('movies-container');
+            container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading cinemas...</span></div>';
+
+            var result = await API.get('/organizer/movies/cinemas');
+            if (!result.ok || !result.data || !result.data.success) {
+                // Try alternate endpoint
+                var result2 = await API.get('/organizer/movies/movies');
+                if (!result2.ok || !result2.data || !result2.data.success) {
+                    container.innerHTML = '<div class="text-center py-12 text-slate-400 text-sm">Could not load movies/cinemas.</div>';
+                    return;
+                }
+                renderMoviesGrid(result2.data.data || result2.data, container);
+                return;
+            }
+
+            var cinemas = result.data.data || result.data;
+            if (!Array.isArray(cinemas)) cinemas = cinemas.cinemas || cinemas.data || [];
+            renderCinemasGrid(cinemas, container);
+        }
+
+        function renderCinemasGrid(cinemas, container) {
+            if (cinemas.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-film text-slate-300 text-4xl mb-4"></i><p class="text-slate-500 text-sm">No cinemas listed yet.</p></div>';
+                return;
+            }
+            container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + cinemas.map(function(c) {
+                return '<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><h4 class="font-bold text-dark">' + esc(c.name) + '</h4><p class="text-xs text-slate-500 mt-1">' + esc(c.city || '') + (c.screens ? ' &bull; ' + c.screens + ' screens' : '') + '</p>' + (c.address ? '<p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-location-dot mr-1 text-primary"></i>' + esc(c.address) + '</p>' : '') + '</div>';
+            }).join('') + '</div>';
+        }
+
+        function renderMoviesGrid(movies, container) {
+            if (movies.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><i class="fa-solid fa-film text-slate-300 text-4xl mb-4"></i><p class="text-slate-500 text-sm">No movies listed yet.</p></div>';
+                return;
+            }
+            container.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + movies.map(function(m) {
+                return '<div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><h4 class="font-bold text-dark">' + esc(m.title || m.name) + '</h4><p class="text-xs text-slate-500 mt-1">' + esc(m.genre || '') + (m.duration ? ' &bull; ' + m.duration + ' min' : '') + '</p>' + (m.language ? '<p class="text-xs text-slate-400 mt-2">Language: ' + esc(m.language) + '</p>' : '') + '</div>';
+            }).join('') + '</div>';
+        }
+
+        // ── Settings: Business Profile ────────────────────────────────
+        async function loadSettings() {
+            var container = document.getElementById('settings-container');
+            container.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-primary text-xl mr-2"></i><span class="text-slate-500 text-sm">Loading profile...</span></div>';
+
+            var result = await API.get('/organizer/organizations/me');
+            if (!result.ok || !result.data || !result.data.success) {
+                container.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Could not load business profile.</p>';
+                return;
+            }
+
+            var org = result.data.data || result.data;
+            container.innerHTML = '<div class="space-y-5">' +
+                '<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Business Name</label><input type="text" value="' + esc(org.name || org.businessName || '') + '" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"></div>' +
+                '<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label><input type="email" value="' + esc(org.email || '') + '" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"></div>' +
+                '<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Contact Phone</label><input type="text" value="' + esc(org.phone || org.contactPhone || '') + '" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"></div>' +
+                '<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Address</label><input type="text" value="' + esc(org.address || '') + '" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"></div>' +
+                (org.gstNumber ? '<div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">GST Number</label><input type="text" value="' + esc(org.gstNumber) + '" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"></div>' : '') +
+                '</div>';
+        }
+
+        // ── Expose globally ──────────────────────────────────────────
+        window.handleLogin = handleLogin;
+        window.handleLogout = handleLogout;
+        window.toggleSidebar = toggleSidebar;
+        window.navigateTo = navigateTo;
+
+        // ── Login Form Handler ───────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            var loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var email = document.getElementById('login-email').value.trim();
+                    var password = document.getElementById('login-password').value;
+                    if (!email || !password) {
+                        var errEl = document.getElementById('login-error');
+                        errEl.classList.remove('hidden-view');
+                        document.getElementById('login-error-msg').textContent = 'Please enter both email and password.';
+                        return;
+                    }
+                    handleLogin(email, password);
+                });
+            }
+        });
+
+    })();
+    </script>
+</body>
+</html>

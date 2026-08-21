@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - EntryMySlot</title>
+    <meta name="description" content="View and manage your bookings on EntryMySlot.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] },
+                    colors: {
+                        custom: {
+                            light: '#f05a28',
+                            dark: '#262626',
+                            darkHover: '#1a1a1a',
+                            lightHover: '#e04c1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::selection { background-color: #f05a28; color: #ffffff; }
+        .booking-card { transition: all 0.2s; }
+        .booking-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .status-confirmed { background: #dcfce7; color: #15803d; }
+        .status-pending { background: #fef9c3; color: #a16207; }
+        .status-cancelled { background: #fee2e2; color: #b91c1c; }
+        .status-completed { background: #e0e7ff; color: #3730a3; }
+        .tab-active { background: #f05a28; color: white; }
+        .tab-inactive { background: #f3f4f6; color: #6b7280; }
+        .tab-inactive:hover { background: #e5e7eb; }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-custom-dark flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-custom-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="index.html" class="flex-shrink-0 mr-4 sm:mr-6 flex items-center">
+                    <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
+                </a>
+                <div class="flex items-center gap-3">
+                    <span id="userNameDisplay" class="hidden sm:block text-sm text-gray-300 font-medium"></span>
+                    <a href="index.html" class="text-xs text-white/80 hover:text-custom-light transition font-medium"><i class="fa-solid fa-house mr-1"></i> Home</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-custom-dark">My Bookings</h1>
+                <p class="text-sm text-gray-500 mt-1">Manage your venue, event, and movie reservations</p>
+            </div>
+            <a href="index.html" class="inline-flex items-center justify-center gap-2 bg-custom-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-custom-darkHover transition shadow-sm">
+                <i class="fa-solid fa-plus"></i> New Booking
+            </a>
+        </div>
+
+        <!-- Status Tabs -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="setFilter('all')" id="tab-all" class="tab-active px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition"><i class="fa-solid fa-list mr-1"></i> All</button>
+            <button onclick="setFilter('confirmed')" id="tab-confirmed" class="tab-inactive px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition"><i class="fa-solid fa-check mr-1"></i> Confirmed</button>
+            <button onclick="setFilter('pending_payment')" id="tab-pending_payment" class="tab-inactive px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition"><i class="fa-solid fa-clock mr-1"></i> Pending</button>
+            <button onclick="setFilter('cancelled')" id="tab-cancelled" class="tab-inactive px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition"><i class="fa-solid fa-xmark mr-1"></i> Cancelled</button>
+            <button onclick="setFilter('completed')" id="tab-completed" class="tab-inactive px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition"><i class="fa-solid fa-circle-check mr-1"></i> Completed</button>
+        </div>
+
+        <!-- Auth Check -->
+        <div id="authPrompt" class="hidden text-center py-16">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4 mx-auto">
+                <i class="fa-solid fa-lock text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-custom-dark mb-2">Please log in first</h3>
+            <p class="text-gray-500 max-w-sm mb-6">Sign in to view your bookings and manage reservations.</p>
+            <a href="auth.html" class="inline-flex items-center gap-2 bg-custom-light text-white px-6 py-3 rounded-lg font-bold hover:bg-custom-lightHover transition shadow-md">
+                <i class="fa-solid fa-right-to-bracket"></i> Login / Register
+            </a>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="text-center py-16 hidden">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-custom-light mb-4 block"></i>
+            <p class="text-gray-500 text-sm">Loading your bookings...</p>
+        </div>
+
+        <!-- Bookings Grid -->
+        <div id="bookingsContainer" class="space-y-4"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
+                <i class="fa-regular fa-calendar-xmark text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-custom-dark mb-2">No bookings found</h3>
+            <p class="text-gray-500 max-w-sm mb-6">You haven't made any bookings yet. Browse venues, events, or movies to get started!</p>
+            <a href="index.html" class="bg-custom-light text-white px-6 py-3 rounded-lg font-bold hover:bg-custom-lightHover transition shadow-md">
+                <i class="fa-solid fa-compass mr-2"></i>Explore Now
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-custom-dark text-gray-300 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-gray-500">Copyright 2026 &copy; EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelModal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-custom-dark mb-2">Cancel Booking?</h3>
+            <p class="text-sm text-gray-500 mb-6">This action cannot be undone. Are you sure you want to cancel this booking?</p>
+            <div class="flex gap-3">
+                <button onclick="closeCancelModal()" class="flex-1 py-2.5 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition">Keep Booking</button>
+                <button onclick="confirmCancel()" id="confirmCancelBtn" class="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/bookings.js"></script>
+    <script src="js/turf.js"></script>
+    <script src="js/events.js"></script>
+    <script>
+    'use strict';
+    (function () {
+        var AUTH = window.EMS_AUTH;
+        var BK   = window.EMS_BOOKINGS;
+        var TURF = window.EMS_TURF;
+        var EV   = window.EMS_EVENTS;
+        var UI   = window.EMS_UI;
+
+        var allBookings = [];
+        var currentFilter = 'all';
+        var cancelTargetId = null;
+
+        // ── Init ──────────────────────────────────────────────────────
+        async function init() {
+            var user = AUTH.getUser();
+            var nameEl = document.getElementById('userNameDisplay');
+            if (nameEl && user && user.name) nameEl.innerText = 'Hi, ' + UI.escapeHtml(user.name);
+
+            if (!AUTH.isLoggedIn()) {
+                document.getElementById('authPrompt').classList.remove('hidden');
+                document.getElementById('bookingsContainer').classList.add('hidden');
+                return;
+            }
+            document.getElementById('authPrompt').classList.add('hidden');
+            await loadAllBookings();
+        }
+
+        async function loadAllBookings() {
+            var loadingEl = document.getElementById('loadingState');
+            var containerEl = document.getElementById('bookingsContainer');
+            loadingEl.classList.remove('hidden');
+            containerEl.classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+
+            allBookings = [];
+            try {
+                // Primary: unified bookings endpoint
+                var result = await BK.myBookings({ page: 1, limit: 50 });
+                if (result.ok && result.data && result.data.success) {
+                    allBookings = Array.isArray(result.data.data) ? result.data.data : [];
+                    if (result.data.pagination) allBookings = allBookings;
+                }
+            } catch (e) {
+                // Fallback: load turf bookings separately
+                try { await loadTurfBookings(); } catch (e2) {}
+            }
+
+            // If still empty, also try turf endpoint
+            if (allBookings.length === 0) {
+                try { await loadTurfBookings(); } catch (e) {}
+            }
+
+            loadingEl.classList.add('hidden');
+            renderBookings();
+        }
+
+        async function loadTurfBookings() {
+            try {
+                var result = await TURF.myBookings({ page: 1, limit: 50 });
+                if (result.ok && result.data && result.data.success) {
+                    var turfBookings = Array.isArray(result.data.data) ? result.data.data : [];
+                    turfBookings.forEach(function (b) { b._bookingType = 'turf'; });
+                    allBookings = allBookings.concat(turfBookings);
+                }
+            } catch (e) { /* turf bookings not available */ }
+        }
+
+        // ── Filtering ─────────────────────────────────────────────────
+        function setFilter(status) {
+            currentFilter = status;
+            document.querySelectorAll('[id^="tab-"]').forEach(function (btn) {
+                btn.className = 'tab-inactive px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition';
+            });
+            var activeBtn = document.getElementById('tab-' + status);
+            if (activeBtn) activeBtn.className = 'tab-active px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition';
+            renderBookings();
+        }
+
+        function getFilteredBookings() {
+            if (currentFilter === 'all') return allBookings;
+            return allBookings.filter(function (b) {
+                return (b.status || '').toLowerCase() === currentFilter.toLowerCase();
+            });
+        }
+
+        // ── Rendering ─────────────────────────────────────────────────
+        function renderBookings() {
+            var container = document.getElementById('bookingsContainer');
+            var emptyEl = document.getElementById('emptyState');
+            var filtered = getFilteredBookings();
+
+            if (filtered.length === 0) {
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                container.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            container.classList.remove('hidden');
+            container.innerHTML = filtered.map(function (b) { return renderBookingCard(b); }).join('');
+
+            // Bind cancel buttons
+            container.querySelectorAll('[data-cancel-id]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    openCancelModal(this.getAttribute('data-cancel-id'));
+                });
+            });
+        }
+
+        function renderBookingCard(booking) {
+            var status = (booking.status || 'pending').toLowerCase();
+            var statusLabel = status.replace(/_/g, ' ').replace(/\b\w/g, function (l) { return l.toUpperCase(); });
+            var statusClass = 'status-' + status;
+            if (status === 'confirmed' || status === 'paid') statusClass = 'status-confirmed';
+            else if (status === 'pending_payment' || status === 'pending') statusClass = 'status-pending';
+            else if (status === 'cancelled' || status === 'canceled') statusClass = 'status-cancelled';
+            else if (status === 'completed') statusClass = 'status-completed';
+
+            var bookingType = booking._bookingType || guessBookingType(booking);
+            var iconMap = { turf: 'fa-futbol', event: 'fa-ticket', movie: 'fa-film' };
+            var icon = iconMap[bookingType] || 'fa-receipt';
+            var title = booking.title || booking.name || booking.eventName || booking.venueName || 'Booking';
+            var subtitle = booking.subtitle || booking.location || '';
+            var dateStr = formatBookingDate(booking);
+            var amount = booking.totalAmount || booking.amount || booking.price || 0;
+            var bookingId = booking._id || booking.id || booking.bookingId || '';
+            var canCancel = (status === 'confirmed' || status === 'pending_payment') && !booking._cancelling;
+
+            var tickets = booking.tickets || [];
+            var hasTickets = tickets.length > 0;
+            var showQr = hasTickets && bookingType === 'event';
+            var isEvent = bookingType === 'event';
+
+            return '<div class="booking-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">' +
+                '<div class="p-5 sm:p-6">' +
+                    '<div class="flex flex-col sm:flex-row sm:items-start gap-4">' +
+                        '<div class="w-12 h-12 bg-custom-light/10 rounded-xl flex items-center justify-center flex-shrink-0">' +
+                            '<i class="fa-solid ' + icon + ' text-custom-light text-xl"></i>' +
+                        '</div>' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<div class="flex items-start justify-between gap-3">' +
+                                '<div>' +
+                                    '<h3 class="text-base sm:text-lg font-bold text-custom-dark leading-tight">' + UI.escapeHtml(title) + '</h3>' +
+                                    (subtitle ? '<p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1 text-custom-light"></i>' + UI.escapeHtml(subtitle) + '</p>' : '') +
+                                    '<p class="text-xs text-gray-400 mt-1 font-mono">ID: ' + (bookingId ? UI.escapeHtml(String(bookingId)).substring(0, 8) : 'N/A') + '...</p>' +
+                                    (isEvent ? '<span class="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider bg-custom-light/10 text-custom-light px-2 py-0.5 rounded">Event Ticket</span>' : '') +
+                                '</div>' +
+                                '<span class="inline-block px-3 py-1 rounded-full text-xs font-bold ' + statusClass + '">' + statusLabel + '</span>' +
+                            '</div>' +
+
+                            // Event tickets row
+                            (showQr ? '<div class="mt-3 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-200">' +
+                                '<p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Your Tickets</p>' +
+                                '<div class="flex flex-wrap gap-2">' +
+                                    tickets.map(function (t) {
+                                        return '<div class="ticket-item flex items-center gap-2">' +
+                                            '<i class="fa-solid fa-qrcode text-custom-light"></i>' +
+                                            '<span class="text-xs font-mono text-gray-600">' + (t.uuid || t._id || t.ticketId || 'Ticket').substring(0, 8) + '</span>' +
+                                            (t.quantity ? '<span class="text-xs text-gray-400">x' + t.quantity + '</span>' : '') +
+                                        '</div>';
+                                    }).join('') +
+                                '</div>' +
+                            '</div>' : '') +
+
+                            '<div class="flex flex-wrap items-center gap-4 mt-4">' +
+                                (dateStr ? '<span class="text-xs text-gray-500"><i class="fa-regular fa-calendar mr-1 text-custom-light"></i> ' + dateStr + '</span>' : '') +
+                                '<span class="text-sm font-bold text-custom-dark">' + UI.formatCurrency(amount) + '</span>' +
+                            '</div>' +
+
+                            '<div class="flex flex-wrap items-center gap-3 mt-3">' +
+                                (showQr ? '<a href="my-bookings.html" class="text-xs text-custom-light hover:text-custom-dark font-bold transition"><i class="fa-solid fa-download mr-1"></i>Download Ticket</a>' : '') +
+                                (canCancel ? '<button data-cancel-id="' + (bookingId || '') + '" class="text-xs text-red-500 hover:text-red-700 font-bold transition"><i class="fa-solid fa-xmark mr-1"></i>Cancel Booking</button>' : '') +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function guessBookingType(booking) {
+            if (booking.sport || booking.groundId || booking.slotIds) return 'turf';
+            if (booking.ticketTypes || booking.attendees) return 'event';
+            if (booking.seatIds || booking.showtimeId) return 'movie';
+            return 'general';
+        }
+
+        function formatBookingDate(booking) {
+            var dateVal = booking.date || booking.createdAt || booking.bookingDate;
+            if (!dateVal) return '';
+            try { return UI.formatDate(new Date(dateVal)); } catch (e) { return String(dateVal); }
+        }
+
+        // ── Cancel Booking ─────────────────────────────────────────────
+        function openCancelModal(bookingId) {
+            cancelTargetId = bookingId;
+            document.getElementById('cancelModal').classList.remove('hidden');
+        }
+
+        function closeCancelModal() {
+            cancelTargetId = null;
+            document.getElementById('cancelModal').classList.add('hidden');
+        }
+
+        async function confirmCancel() {
+            if (!cancelTargetId) return;
+            var btn = document.getElementById('confirmCancelBtn');
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Cancelling...';
+            try {
+                await BK.cancel(cancelTargetId, 'Cancelled by user');
+                // Also try turf cancel
+                try { await TURF.cancelBooking(cancelTargetId); } catch (e) {}
+                UI.toast('Booking cancelled successfully', 'success');
+                closeCancelModal();
+                await loadAllBookings();
+            } catch (err) {
+                UI.toast(err.message || 'Failed to cancel booking', 'error');
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'Yes, Cancel';
+            }
+        }
+
+        // ── Expose globally ──────────────────────────────────────────
+        window.setFilter = setFilter;
+        window.openCancelModal = openCancelModal;
+        window.closeCancelModal = closeCancelModal;
+        window.confirmCancel = confirmCancel;
+
+        // ── Start ─────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+    </script>
+</body>
+</html>

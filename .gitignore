@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs
+backend/dist/
+backend/.test-build/
+frontend/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+backend/data/
+
+# Logs
+backend/logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Uploads (keep directory structure but ignore contents)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Coverage
+coverage/
+*.lcov
+
+# Test artifacts
+*.test-results/

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register - EntryMySlot</title>
+    <meta name="description" content="Login or register for EntryMySlot.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] },
+                    colors: {
+                        custom: {
+                            light: '#f05a28',
+                            dark: '#262626',
+                            darkHover: '#1a1a1a',
+                            lightHover: '#e04c1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::selection { background-color: #f05a28; color: #ffffff; }
+        .input-field {
+            width: 100%; padding: 12px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+            font-size: 14px; transition: all 0.2s; outline: none;
+        }
+        .input-field:focus { border-color: #f05a28; box-shadow: 0 0 0 3px rgba(240,90,40,0.1); }
+        .btn-primary {
+            width: 100%; padding: 14px; background: #f05a28; color: white; border: none;
+            border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+            transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:hover { background: #e04c1a; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .otp-input {
+            width: 48px; height: 56px; text-align: center; font-size: 24px; font-weight: 700;
+            border: 2px solid #e5e7eb; border-radius: 10px; outline: none; transition: border-color 0.2s;
+        }
+        .otp-input:focus { border-color: #f05a28; }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-custom-dark flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-custom-dark text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="index.html" class="flex-shrink-0 flex items-center group">
+                    <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
+                </a>
+                <a href="index.html" class="text-white/80 hover:text-white text-sm font-medium transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-grow flex items-center justify-center px-4 py-10">
+        <div class="w-full max-w-md">
+
+            <!-- Card -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+
+                <!-- Tab Switcher -->
+                <div class="flex">
+                    <button id="tabLogin" onclick="switchTab('login')" class="flex-1 py-4 text-center text-sm font-bold bg-custom-light text-white transition">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Login
+                    </button>
+                    <button id="tabRegister" onclick="switchTab('register')" class="flex-1 py-4 text-center text-sm font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Register
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="loginForm" class="p-6 sm:p-8 space-y-5" onsubmit="event.preventDefault(); handleLogin();">
+                    <div id="loginPhoneSection">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Phone Number</label>
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center px-4 py-3 bg-gray-100 border border-r-0 border-gray-200 rounded-l-lg text-sm text-gray-500 font-medium">+91</span>
+                            <input type="tel" id="loginPhone" placeholder="Enter 10-digit number" maxlength="10" pattern="[0-9]{10}" required
+                                class="flex-1 p-3 border border-gray-200 rounded-r-lg outline-none focus:border-custom-light text-sm transition-colors" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">We will send you a one-time SMS verification code.</p>
+                    </div>
+
+                    <!-- OTP Section (hidden initially) -->
+                    <div id="otpSection" class="hidden">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Enter OTP</label>
+                        <p class="text-xs text-gray-500 mb-3">Sent to +91 <span id="otpPhoneDisplay"></span></p>
+                        <div class="flex gap-2 justify-center mb-2" id="otpInputs">
+                            <input type="text" maxlength="1" class="otp-input" data-index="0" oninput="moveOtp(this, 0)" onkeydown="backOtp(event, 0)">
+                            <input type="text" maxlength="1" class="otp-input" data-index="1" oninput="moveOtp(this, 1)" onkeydown="backOtp(event, 1)">
+                            <input type="text" maxlength="1" class="otp-input" data-index="2" oninput="moveOtp(this, 2)" onkeydown="backOtp(event, 2)">
+                            <input type="text" maxlength="1" class="otp-input" data-index="3" oninput="moveOtp(this, 3)" onkeydown="backOtp(event, 3)">
+                            <input type="text" maxlength="1" class="otp-input" data-index="4" oninput="moveOtp(this, 4)" onkeydown="backOtp(event, 4)">
+                            <input type="text" maxlength="1" class="otp-input" data-index="5" oninput="moveOtp(this, 5)" onkeydown="backOtp(event, 5)">
+                        </div>
+                        <p class="text-xs text-center text-gray-400">Did not receive? <button type="button" onclick="resendOtp()" id="resendBtn" class="text-custom-light font-bold hover:underline">Resend</button> <span id="resendTimer" class="hidden">(<span id="timerSec">30</span>s)</span></p>
+                    </div>
+
+                    <button type="submit" id="loginBtn" class="btn-primary">
+                        <span id="loginBtnText">Get OTP</span>
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="registerForm" class="hidden p-6 sm:p-8 space-y-4" onsubmit="event.preventDefault(); handleRegister();">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Full Name</label>
+                        <input type="text" id="regName" placeholder="Your full name" required class="input-field">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Email</label>
+                        <input type="email" id="regEmail" placeholder="you@example.com" class="input-field">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Phone Number</label>
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center px-3 py-3 bg-gray-100 border border-r-0 border-gray-200 rounded-l-lg text-sm text-gray-500">+91</span>
+                            <input type="tel" id="regPhone" placeholder="Enter 10-digit number" maxlength="10" pattern="[0-9]{10}" required
+                                class="flex-1 p-3 border border-gray-200 rounded-r-lg outline-none focus:border-custom-light text-sm transition-colors" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Password</label>
+                        <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6" class="input-field">
+                    </div>
+                    <button type="submit" id="registerBtn" class="btn-primary">
+                        <span id="registerBtnText">Create Account</span>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="px-6 sm:px-8 pb-2">
+                    <div class="border-t border-gray-100 pt-4">
+                        <p class="text-xs text-gray-400 text-center">By signing up, you agree to our <a href="#" class="text-custom-light font-bold hover:underline">Terms</a> and <a href="#" class="text-custom-light font-bold hover:underline">Privacy Policy</a>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logged-in State (shown when already authenticated) -->
+            <div id="loggedInCard" class="hidden bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-custom-dark mb-1">You are logged in!</h2>
+                <p class="text-sm text-gray-500 mb-6">You can continue booking or manage your reservations.</p>
+                <div class="space-y-3">
+                    <a href="my-bookings.html" class="btn-primary"><i class="fa-solid fa-ticket"></i> My Bookings</a>
+                    <button onclick="handleLogout()" class="btn-primary" style="background:#262626"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-custom-dark text-gray-300 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-gray-500">Copyright 2026 &copy; EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    'use strict';
+    (function () {
+        var AUTH = window.EMS_AUTH;
+        var UI   = window.EMS_UI;
+
+        var loginStep = 'phone';  // 'phone' | 'otp'
+        var loginPhone = '';
+        var resendInterval = null;
+
+        // ── Check auth state on load ──────────────────────────────────
+        function checkAuth() {
+            if (AUTH.isLoggedIn()) {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('tabLogin').classList.add('hidden');
+                document.getElementById('tabRegister').classList.add('hidden');
+                document.getElementById('loggedInCard').classList.remove('hidden');
+                return true;
+            }
+            return false;
+        }
+
+        // ── Tab switching ─────────────────────────────────────────────
+        function switchTab(tab) {
+            var loginForm = document.getElementById('loginForm');
+            var registerForm = document.getElementById('registerForm');
+            var tabLogin = document.getElementById('tabLogin');
+            var tabRegister = document.getElementById('tabRegister');
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden'); registerForm.classList.add('hidden');
+                tabLogin.className = 'flex-1 py-4 text-center text-sm font-bold bg-custom-light text-white transition';
+                tabRegister.className = 'flex-1 py-4 text-center text-sm font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition';
+            } else {
+                registerForm.classList.remove('hidden'); loginForm.classList.add('hidden');
+                tabRegister.className = 'flex-1 py-4 text-center text-sm font-bold bg-custom-light text-white transition';
+                tabLogin.className = 'flex-1 py-4 text-center text-sm font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition';
+            }
+            resetLoginState();
+        }
+
+        function resetLoginState() {
+            loginStep = 'phone';
+            loginPhone = '';
+            document.getElementById('loginPhoneSection').classList.remove('hidden');
+            document.getElementById('otpSection').classList.add('hidden');
+            document.getElementById('loginPhone').value = '';
+            document.getElementById('loginBtnText').innerText = 'Get OTP';
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginForm').classList.remove('hidden');
+            clearResendTimer();
+        }
+
+        // ── Login flow ────────────────────────────────────────────────
+        async function handleLogin() {
+            var btn = document.getElementById('loginBtn');
+            var btnText = document.getElementById('loginBtnText');
+
+            if (loginStep === 'phone') {
+                var phoneInput = document.getElementById('loginPhone');
+                loginPhone = (phoneInput && phoneInput.value || '').trim();
+                if (loginPhone.length !== 10) { UI.toast('Please enter a valid 10-digit number', 'error'); return; }
+                btn.disabled = true; btnText.innerText = 'Sending OTP...';
+                try {
+                    await AUTH.login(loginPhone, 'LOGIN');
+                    showOtpSection();
+                    UI.toast('OTP sent successfully!', 'success');
+                } catch (err) {
+                    UI.toast(err.message || 'Failed to send OTP', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btnText.innerText = 'Get OTP';
+                }
+            } else if (loginStep === 'otp') {
+                var otpInputs = document.querySelectorAll('#otpInputs .otp-input');
+                var otp = '';
+                otpInputs.forEach(function (inp) { otp += inp.value; });
+                if (otp.length !== 6) { UI.toast('Please enter the complete 6-digit OTP', 'error'); return; }
+                btn.disabled = true; btnText.innerText = 'Verifying...';
+                try {
+                    await AUTH.verifyOtp(loginPhone, otp);
+                    UI.toast('Login successful!', 'success');
+                    var user = AUTH.getUser();
+                    // Redirect to return URL if set, otherwise to my-bookings.html
+                    var returnUrl = sessionStorage.getItem('ems_return_url');
+                    if (returnUrl) {
+                        sessionStorage.removeItem('ems_return_url');
+                        window.location.href = returnUrl;
+                    } else if (user) {
+                        window.location.href = 'my-bookings.html';
+                    } else {
+                        checkAuth();
+                    }
+                } catch (err) {
+                    UI.toast(err.message || 'Invalid OTP. Please try again.', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btnText.innerText = 'Verify & Login';
+                }
+            }
+        }
+
+        function showOtpSection() {
+            loginStep = 'otp';
+            document.getElementById('loginPhoneSection').classList.add('hidden');
+            document.getElementById('otpSection').classList.remove('hidden');
+            document.getElementById('otpPhoneDisplay').innerText = loginPhone;
+            document.getElementById('loginBtnText').innerText = 'Verify & Login';
+            startResendTimer();
+            var firstInput = document.querySelector('#otpInputs .otp-input');
+            if (firstInput) firstInput.focus();
+        }
+
+        function moveOtp(el, index) {
+            if (el.value.length === 1 && index < 5) {
+                var next = document.querySelector('#otpInputs .otp-input[data-index="' + (index + 1) + '"]');
+                if (next) next.focus();
+            }
+        }
+
+        function backOtp(e, index) {
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                var prev = document.querySelector('#otpInputs .otp-input[data-index="' + (index - 1) + '"]');
+                if (prev) prev.focus();
+            }
+        }
+
+        function startResendTimer() {
+            clearResendTimer();
+            var sec = 30;
+            document.getElementById('resendTimer').classList.remove('hidden');
+            document.getElementById('resendBtn').classList.add('hidden');
+            document.getElementById('timerSec').innerText = sec;
+            resendInterval = setInterval(function () {
+                sec--;
+                document.getElementById('timerSec').innerText = sec;
+                if (sec <= 0) { clearResendTimer(); }
+            }, 1000);
+        }
+
+        function clearResendTimer() {
+            if (resendInterval) { clearInterval(resendInterval); resendInterval = null; }
+            document.getElementById('resendTimer').classList.add('hidden');
+            document.getElementById('resendBtn').classList.remove('hidden');
+        }
+
+        async function resendOtp() {
+            if (!loginPhone) return;
+            try {
+                await AUTH.login(loginPhone, 'LOGIN');
+                UI.toast('OTP resent!', 'success');
+                startResendTimer();
+                var firstInput = document.querySelector('#otpInputs .otp-input');
+                if (firstInput) { firstInput.value = ''; firstInput.focus(); }
+            } catch (err) {
+                UI.toast(err.message || 'Failed to resend OTP', 'error');
+            }
+        }
+
+        // ── Register flow ─────────────────────────────────────────────
+        async function handleRegister() {
+            var name = (document.getElementById('regName').value || '').trim();
+            var email = (document.getElementById('regEmail').value || '').trim();
+            var phone = (document.getElementById('regPhone').value || '').trim();
+            var password = document.getElementById('regPassword').value || '';
+            var btn = document.getElementById('registerBtn');
+            var btnText = document.getElementById('registerBtnText');
+
+            if (!name || phone.length !== 10 || password.length < 6) {
+                UI.toast('Please fill all fields correctly. Password must be 6+ chars.', 'error'); return;
+            }
+            btn.disabled = true; btnText.innerText = 'Creating account...';
+            try {
+                await AUTH.register(name, phone, email, password);
+                UI.toast('Account created! Please log in.', 'success');
+                switchTab('login');
+                document.getElementById('loginPhone').value = phone;
+            } catch (err) {
+                UI.toast(err.message || 'Registration failed.', 'error');
+            } finally {
+                btn.disabled = false; btnText.innerText = 'Create Account';
+            }
+        }
+
+        // ── Logout ────────────────────────────────────────────────────
+        async function handleLogout() {
+            try { await AUTH.logout(); } catch (e) {}
+            UI.toast('Logged out successfully', 'success');
+            window.location.reload();
+        }
+
+        // ── Expose globally ──────────────────────────────────────────
+        window.switchTab = switchTab;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.handleLogout = handleLogout;
+        window.moveOtp = moveOtp;
+        window.backOtp = backOtp;
+        window.resendOtp = resendOtp;
+
+        // ── Init ─────────────────────────────────────────────────────
+        if (!checkAuth()) {
+            // Check URL param to pre-select tab
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'register') switchTab('register');
+        }
+    })();
+    </script>
+</body>
+</html>

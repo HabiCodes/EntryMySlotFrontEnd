@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - EntryMySlot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f05a28',
+                        'primary-hover': '#e04c1a',
+                        'primary-light': 'rgba(240,90,40,0.1)',
+                        dark: '#262626',
+                        'dark-light': '#3a3a3a',
+                        'off-white': '#f4f4f5',
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+        .page-view { display: none; }
+        .page-view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:translateY(0);} }
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="bg-off-white text-dark font-sans overflow-x-hidden">
+
+    <!-- AUTH VIEW -->
+    <div id="auth-view" class="min-h-screen w-full flex">
+        <div class="hidden lg:flex w-1/2 bg-dark flex-col justify-center items-center p-12 relative text-white">
+            <div class="absolute inset-0 opacity-5" style="background:radial-gradient(circle at 50% 50%,#f05a28,transparent)"></div>
+            <div class="relative z-10 text-center max-w-lg">
+                <div class="w-24 h-24 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center text-5xl font-black mb-8 mx-auto shadow-lg border border-white/10">E</div>
+                <h1 class="text-4xl font-bold mb-4">Super Admin Portal</h1>
+                <p class="text-gray-400 text-lg">Central command for EntryMySlot. Manage turfs, cinemas, events, and platform managers.</p>
+            </div>
+        </div>
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
+            <div class="w-full max-w-md">
+                <div class="lg:hidden flex justify-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center text-white text-4xl font-black">E</div>
+                </div>
+                <h2 class="text-3xl font-black text-dark mb-2 text-center" id="auth-title">Super Admin Login</h2>
+                <p class="text-gray-500 font-medium text-center mb-8" id="auth-subtitle">Elevated access required.</p>
+                <form id="login-form" class="space-y-5" onsubmit="event.preventDefault(); handleAdminLogin();">
+                    <div id="login-error" class="hidden-view bg-red-50 border border-red-100 text-red-600 text-sm p-4 rounded-xl text-center font-bold">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid credentials. Please try again.
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Email</label>
+                        <input type="email" id="admin-email" placeholder="admin@entrymyslot.com" required class="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary outline-none transition font-medium bg-gray-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter password" required class="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-primary outline-none transition font-medium bg-gray-50 focus:bg-white">
+                    </div>
+                    <button type="submit" id="adminLoginBtn" class="w-full bg-dark hover:bg-black text-white font-bold py-4 rounded-xl transition text-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> Authenticate
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="hidden-view flex h-screen overflow-hidden">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden-view" onclick="toggleSidebar()"></div>
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-dark text-gray-300 flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform h-full overflow-y-auto shadow-2xl border-r border-white/5">
+            <div class="p-6 flex items-center gap-4 sticky top-0 bg-black/20 backdrop-blur z-10">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary to-orange-600 rounded-xl flex items-center justify-center font-bold text-xl text-white">E</div>
+                <div>
+                    <div class="text-lg font-bold text-white tracking-tight">Entry<span class="text-primary">MySlot</span></div>
+                    <div class="text-[10px] font-black uppercase tracking-widest text-primary">Super Admin</div>
+                </div>
+                <button class="lg:hidden ml-auto p-2 rounded-lg hover:bg-white/10 text-white" onclick="toggleSidebar()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-1">
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-4 mb-3">Platform</div>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/5 font-medium" data-target="dashboard-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Command Center
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="bookings-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg> All Bookings
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="approvals-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Approvals <span id="approvalBadge" class="ml-auto bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                </a>
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-4 mb-3 mt-8">Directory</div>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="managers-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Managers
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="turfs-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg> Turfs
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="cinemas-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg> Cinemas & Movies
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition font-medium" data-target="events-page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Events
+                </a>
+            </nav>
+            <div class="p-4 m-4 bg-white/5 rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center font-bold text-white">SA</div>
+                    <div class="flex-1"><p class="text-sm font-bold text-white">Super Admin</p><p class="text-[10px] text-primary font-bold">Root Access</p></div>
+                    <button onclick="handleAdminLogout()" class="p-2 text-gray-400 hover:text-red-400 transition" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-dark p-2 rounded-xl border border-gray-200" onclick="toggleSidebar()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <div><h1 id="pageTitle" class="text-xl font-bold tracking-tight">Command Center</h1><p id="pageBreadcrumb" class="text-xs text-gray-500">Super Admin / Dashboard</p></div>
+                </div>
+            </header>
+            <div class="flex-1 overflow-y-auto p-4 sm:p-8">
+
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-view active max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-black mb-6">System Overview</h2>
+                    <div id="statsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm"><i class="fa-solid fa-spinner fa-spin text-primary text-xl"></i><p class="text-sm text-gray-500 mt-3">Loading stats...</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                            <h3 class="font-bold text-lg mb-4">Recent System Activity</h3>
+                            <div id="activityFeed" class="space-y-3">
+                                <p class="text-sm text-gray-400">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                            <h3 class="font-bold text-lg mb-4">Platform Health</h3>
+                            <div id="healthPanel" class="space-y-3">
+                                <p class="text-sm text-gray-400">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookings Page -->
+                <div id="bookings-page" class="page-view max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-black mb-6">All Bookings</h2>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 flex gap-3 flex-wrap">
+                            <input type="text" id="adminBookingSearch" placeholder="Search bookings..." oninput="renderAdminBookings()" class="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-primary flex-1 min-w-[200px]">
+                            <select id="adminBookingStatusFilter" onchange="renderAdminBookings()" class="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer">
+                                <option value="">All Status</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending_payment">Pending</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <thead><tr class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200">
+                                    <th class="py-3 px-4">ID</th><th class="py-3 px-4">User</th><th class="py-3 px-4">Type</th><th class="py-3 px-4">Amount</th><th class="py-3 px-4">Status</th><th class="py-3 px-4">Date</th>
+                                </tr></thead>
+                                <tbody id="adminBookingsTable" class="divide-y divide-gray-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                        <div id="adminBookingsEmpty" class="hidden p-8 text-center text-gray-400"><p>No bookings found.</p></div>
+                    </div>
+                </div>
+
+                <!-- Approvals Page -->
+                <div id="approvals-page" class="page-view max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-black mb-6">Pending Approvals</h2>
+                    <div id="approvalsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="col-span-full text-center py-12 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mr-2"></i> Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Managers Page -->
+                <div id="managers-page" class="page-view max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-black">Platform Managers</h2>
+                        <button onclick="showCreateManager()" class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition">
+                            <i class="fa-solid fa-plus"></i> Add Manager
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <thead><tr class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200">
+                                    <th class="py-3 px-4">Manager</th><th class="py-3 px-4">Email</th><th class="py-3 px-4">Organization</th><th class="py-3 px-4">Status</th><th class="py-3 px-4">Actions</th>
+                                </tr></thead>
+                                <tbody id="managersTable" class="divide-y divide-gray-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                        <div id="managersEmpty" class="hidden p-8 text-center text-gray-400">No managers found.</div>
+                    </div>
+                </div>
+
+                <!-- Turfs Page -->
+                <div id="turfs-page" class="page-view max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-black mb-6">Turf Venues</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="adminTurfsGrid"></div>
+                    <div id="adminTurfsEmpty" class="hidden text-center py-12 text-gray-400">No venues found.</div>
+                </div>
+
+                <!-- Cinemas Page -->
+                <div id="cinemas-page" class="page-view max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-black mb-6">Cinemas</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="adminCinemasGrid"></div>
+                    <div id="adminCinemasEmpty" class="hidden text-center py-12 text-gray-400">No cinemas found.</div>
+                </div>
+
+                <!-- Events Page -->
+                <div id="events-page" class="page-view max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-black">Events</h2>
+                        <button onclick="showCreateEvent()" class="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition">
+                            <i class="fa-solid fa-plus"></i> Create Event
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="adminEventsGrid"></div>
+                    <div id="adminEventsEmpty" class="hidden text-center py-12 text-gray-400">No events found.</div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+    'use strict';
+    (function () {
+        var API = window.EMS_API;
+        var UI  = window.EMS_UI;
+        var AUTH = window.EMS_AUTH;
+
+        var adminToken = null;
+        var sidebarOpen = false;
+        var currentPage = 'dashboard-page';
+        var cachedStats = null;
+
+        // ── Admin token management ─────────────────────────────────────
+        function setAdminToken(token) {
+            adminToken = token;
+            localStorage.setItem('ems_admin_token', token);
+            // Override API base to use admin token
+            AUTH.setAdminToken(token);
+        }
+
+        function getAdminToken() {
+            if (!adminToken) adminToken = localStorage.getItem('ems_admin_token');
+            return adminToken;
+        }
+
+        // Override API.get/post to inject admin token
+        var origApiGet = API.get;
+        var origApiPost = API.post;
+        API.get = function (path, opts) {
+            opts = opts || {};
+            var adminTok = getAdminToken();
+            if (adminTok) {
+                opts.headers = opts.headers || {};
+                opts.headers['Authorization'] = 'Bearer ' + adminTok;
+            }
+            return origApiGet(path, opts);
+        };
+        API.post = function (path, body, opts) {
+            opts = opts || {};
+            var adminTok = getAdminToken();
+            if (adminTok) {
+                opts.headers = opts.headers || {};
+                opts.headers['Authorization'] = 'Bearer ' + adminTok;
+            }
+            return origApiPost(path, body, opts);
+        };
+
+        // ── Admin Login ────────────────────────────────────────────────
+        async function handleAdminLogin() {
+            var email = document.getElementById('admin-email').value.trim();
+            var password = document.getElementById('admin-password').value;
+            var btn = document.getElementById('adminLoginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+            try {
+                var result = await AUTH.adminLogin(email, password);
+                if (result.ok && result.data && result.data.success) {
+                    var token = result.data.data?.accessToken || result.data.data?.token;
+                    if (token) {
+                        setAdminToken(token);
+                        document.getElementById('auth-view').classList.add('hidden-view');
+                        document.getElementById('dashboard-view').classList.remove('hidden-view');
+                        document.getElementById('login-error').classList.add('hidden-view');
+                        loadDashboard();
+                    } else {
+                        throw new Error('No token received');
+                    }
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden-view');
+                }
+            } catch (err) {
+                document.getElementById('login-error').classList.remove('hidden-view');
+                UI.toast(err.message || 'Authentication failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Authenticate';
+            }
+        }
+
+        async function handleAdminLogout() {
+            try { await AUTH.adminLogout(); } catch (e) {}
+            adminToken = null;
+            localStorage.removeItem('ems_admin_token');
+            document.getElementById('auth-view').classList.remove('hidden-view');
+            document.getElementById('dashboard-view').classList.add('hidden-view');
+            document.getElementById('admin-email').value = '';
+            document.getElementById('admin-password').value = '';
+        }
+
+        // ── Navigation ────────────────────────────────────────────────
+        document.querySelectorAll('.nav-item').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                var target = this.dataset.target;
+                switchPage(target);
+            });
+        });
+
+        function switchPage(pageId) {
+            currentPage = pageId;
+            document.querySelectorAll('.page-view').forEach(function (p) { p.classList.remove('active'); });
+            var target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+            // Update sidebar active state
+            document.querySelectorAll('.nav-item').forEach(function (n) {
+                n.classList.remove('bg-white/5','text-white','active');
+                n.classList.add('text-gray-400');
+                if (n.dataset.target === pageId) { n.classList.add('bg-white/5','text-white','active'); n.classList.remove('text-gray-400'); }
+            });
+            // Update top bar
+            var titles = { 'dashboard-page':'Command Center','bookings-page':'All Bookings','approvals-page':'Pending Approvals','managers-page':'Platform Managers','turfs-page':'Turf Venues','cinemas-page':'Cinemas & Movies','events-page':'Events Management' };
+            document.getElementById('pageTitle').textContent = titles[pageId] || pageId;
+            document.getElementById('pageBreadcrumb').textContent = 'Super Admin / ' + (titles[pageId] || pageId);
+            // Load page data
+            if (pageId === 'dashboard-page') loadDashboard();
+            else if (pageId === 'bookings-page') loadAdminBookings();
+            else if (pageId === 'approvals-page') loadApprovals();
+            else if (pageId === 'managers-page') loadManagers();
+            else if (pageId === 'turfs-page') loadAdminTurfs();
+            else if (pageId === 'cinemas-page') loadAdminCinemas();
+            else if (pageId === 'events-page') loadAdminEvents();
+        }
+
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            document.getElementById('sidebar').classList.toggle('-translate-x-full', !sidebarOpen);
+            document.getElementById('sidebar-overlay').classList.toggle('hidden-view', !sidebarOpen);
+        }
+
+        // ── Dashboard ─────────────────────────────────────────────────
+        async function loadDashboard() {
+            if (cachedStats) { renderStats(cachedStats); return; }
+            try {
+                var result = await API.get('/admin/stats');
+                if (result.ok && result.data && result.data.success) {
+                    cachedStats = result.data.data;
+                    renderStats(cachedStats);
+                }
+            } catch (e) {
+                document.getElementById('statsGrid').innerHTML = '<div class="col-span-full text-center text-red-400 py-8"><i class="fa-solid fa-circle-exclamation mr-2"></i>Failed to load stats. Check if admin server is running.</div>';
+            }
+        }
+
+        function renderStats(data) {
+            var cards = [
+                { label: 'Total Bookings', value: data.totalBookings || data.total_bookings || 0, icon: 'fa-receipt', color: 'text-blue-600 bg-blue-50', change: '' },
+                { label: 'Confirmed', value: data.confirmedBookings || data.confirmed_bookings || 0, icon: 'fa-check', color: 'text-green-600 bg-green-50', change: '' },
+                { label: 'Cancelled', value: data.cancelledBookings || data.cancelled_bookings || 0, icon: 'fa-xmark', color: 'text-red-600 bg-red-50', change: '' },
+                { label: 'Total Users', value: data.totalUsers || data.total_users || 0, icon: 'fa-users', color: 'text-purple-600 bg-purple-50', change: '' },
+            ];
+            document.getElementById('statsGrid').innerHTML = cards.map(function (c) {
+                return '<div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">' +
+                    '<div class="w-12 h-12 ' + c.color + ' rounded-2xl flex items-center justify-center mb-4"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M' + getIconPath(c.icon) + '"/></svg></div>' +
+                    '<p class="text-xs font-bold text-gray-400 uppercase tracking-widest">' + c.label + '</p>' +
+                    '<h3 class="text-3xl font-black text-dark mt-1">' + UI.formatCurrency(c.value) + '</h3>' +
+                '</div>';
+            }).join('');
+
+            // Recent activity from stats
+            var events = data.recentEvents || data.events || [];
+            var feedEl = document.getElementById('activityFeed');
+            if (events.length === 0) {
+                feedEl.innerHTML = '<p class="text-sm text-gray-400">No recent activity data.</p>';
+            } else {
+                feedEl.innerHTML = events.slice(0, 5).map(function (ev) {
+                    return '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">' +
+                        '<div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+                        '<div><p class="text-sm font-bold text-dark">' + UI.escapeHtml(ev.title || ev.name || 'Event') + '</p>' +
+                        '<p class="text-xs text-gray-500">' + (ev.booked || ev.checkedIn || 0) + ' bookings</p></div></div>';
+                }).join('');
+            }
+        }
+
+        function getIconPath(icon) {
+            var paths = { 'fa-receipt': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6', 'fa-check': 'M20 6L9 17l-5-5', 'fa-xmark': 'M18 6L6 18M6 6l12 12', 'fa-users': 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' };
+            return paths[icon] || '';
+        }
+
+        // ── Admin Bookings ─────────────────────────────────────────────
+        async function loadAdminBookings() {
+            try {
+                var result = await API.get('/admin/bookings', { query: { limit: 50 } });
+                var bookings = [];
+                if (result.ok && result.data && result.data.success) {
+                    bookings = Array.isArray(result.data.data) ? result.data.data : (Array.isArray(result.data) ? result.data : []);
+                }
+                renderAdminBookingsList(bookings);
+            } catch (e) {
+                document.getElementById('adminBookingsTable').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-400 text-sm">Failed to load bookings.</td></tr>';
+            }
+        }
+
+        function renderAdminBookingsList(bookings) {
+            var search = (document.getElementById('adminBookingSearch').value || '').toLowerCase();
+            var statusFilter = document.getElementById('adminBookingStatusFilter').value;
+            var filtered = bookings.filter(function (b) {
+                var matchSearch = !search || (b.user_email || '').toLowerCase().includes(search) || (b.event_title || '').toLowerCase().includes(search);
+                var matchStatus = !statusFilter || (b.status || '').toLowerCase() === statusFilter;
+                return matchSearch && matchStatus;
+            });
+            if (filtered.length === 0) {
+                document.getElementById('adminBookingsTable').innerHTML = '';
+                document.getElementById('adminBookingsEmpty').classList.remove('hidden');
+            } else {
+                document.getElementById('adminBookingsEmpty').classList.add('hidden');
+                document.getElementById('adminBookingsTable').innerHTML = filtered.map(function (b) {
+                    return '<tr class="hover:bg-gray-50/50">' +
+                        '<td class="py-3 px-4 text-xs font-mono text-gray-500">' + UI.escapeHtml((b._id || b.id || '').substring(0, 8)) + '</td>' +
+                        '<td class="py-3 px-4 font-medium">' + UI.escapeHtml(b.user_email || b.user?.email || 'N/A') + '</td>' +
+                        '<td class="py-3 px-4 text-xs uppercase font-bold text-gray-500">' + UI.escapeHtml(b.type || 'event') + '</td>' +
+                        '<td class="py-3 px-4 font-bold">' + UI.formatCurrency(b.totalAmount || b.amount || 0) + '</td>' +
+                        '<td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-bold ' + getStatusClass(b.status) + '">' + UI.escapeHtml(b.status || 'unknown') + '</span></td>' +
+                        '<td class="py-3 px-4 text-xs text-gray-500">' + formatDate(b.createdAt || b.created_at) + '</td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+
+        function renderAdminBookings() {
+            // re-trigger load (in practice we'd cache)
+            loadAdminBookings();
+        }
+
+        // ── Approvals (Turf venues + Organizer applications) ───────────
+        async function loadApprovals() {
+            try {
+                // Load turf venues with pending status
+                var venuesResult = await API.get('/turf/admin/venues', { query: { status: 'pending', limit: 20 } });
+                var venues = [];
+                if (venuesResult.ok && venuesResult.data && venuesResult.data.success) {
+                    venues = Array.isArray(venuesResult.data.data) ? venuesResult.data.data : [];
+                }
+                // Load organizer applications with pending status
+                var appsResult = await API.get('/admin/organizer-applications', { query: { status: 'pending', limit: 20 } });
+                var apps = [];
+                if (appsResult.ok && appsResult.data && appsResult.data.success) {
+                    apps = Array.isArray(appsResult.data.data) ? appsResult.data.data : [];
+                }
+
+                var pendingCount = venues.length + apps.length;
+                var badge = document.getElementById('approvalBadge');
+                if (pendingCount > 0) { badge.textContent = pendingCount; badge.classList.remove('hidden'); }
+                else { badge.classList.add('hidden'); }
+
+                var html = '';
+                venues.forEach(function (v) {
+                    html += buildVenueApprovalCard(v);
+                });
+                apps.forEach(function (a) {
+                    html += buildOrgApprovalCard(a);
+                });
+                if (!html) html = '<div class="col-span-full text-center py-12 text-gray-400"><i class="fa-solid fa-circle-check text-4xl mb-3 text-green-400 block"></i>No pending approvals.</div>';
+                document.getElementById('approvalsList').innerHTML = html;
+
+                // Bind buttons
+                document.querySelectorAll('[data-approve-venue]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { updateVenueStatus(this.dataset.approveVenue, 'approved'); });
+                });
+                document.querySelectorAll('[data-reject-venue]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { updateVenueStatus(this.dataset.rejectVenue, 'suspended'); });
+                });
+                document.querySelectorAll('[data-approve-app]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { reviewOrgApp(this.dataset.approveApp, 'approve'); });
+                });
+                document.querySelectorAll('[data-reject-app]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { reviewOrgApp(this.dataset.rejectApp, 'soft_reject'); });
+                });
+            } catch (e) {
+                document.getElementById('approvalsList').innerHTML = '<div class="col-span-full text-center py-12 text-red-400">Failed to load approvals.</div>';
+            }
+        }
+
+        function buildVenueApprovalCard(v) {
+            var img = v.image || 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=400&auto=format&fit=crop';
+            return '<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">' +
+                '<div class="h-32 bg-gray-100 relative"><img src="' + img + '" class="w-full h-full object-cover opacity-70" alt=""><span class="absolute top-3 left-3 bg-dark/80 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg">Turf</span></div>' +
+                '<div class="p-5"><h3 class="font-bold text-lg">' + UI.escapeHtml(v.name || 'Venue') + '</h3>' +
+                '<p class="text-sm text-gray-500">' + UI.escapeHtml(v.location || '') + '</p>' +
+                '<p class="text-xs text-gray-400 mt-1">Sport: ' + UI.escapeHtml((v.sport || '').toUpperCase()) + '</p>' +
+                '<div class="flex gap-2 mt-4"><button data-approve-venue="' + (v._id || v.id) + '" class="flex-1 bg-dark text-white py-2 rounded-xl text-xs font-bold hover:bg-black transition">Approve</button>' +
+                '<button data-reject-venue="' + (v._id || v.id) + '" class="flex-1 bg-red-50 text-red-500 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition">Reject</button></div></div></div>';
+        }
+
+        function buildOrgApprovalCard(a) {
+            return '<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">' +
+                '<div class="p-5"><h3 class="font-bold text-lg">' + UI.escapeHtml(a.businessName || a.organizationName || 'Organization') + '</h3>' +
+                '<p class="text-sm text-gray-500">Requested by: ' + UI.escapeHtml(a.contactEmail || a.email || 'N/A') + '</p>' +
+                '<p class="text-xs text-gray-400 mt-1">Type: ' + UI.escapeHtml(a.businessType || a.type || 'N/A') + '</p>' +
+                '<div class="flex gap-2 mt-4"><button data-approve-app="' + (a._id || a.id) + '" class="flex-1 bg-dark text-white py-2 rounded-xl text-xs font-bold hover:bg-black transition">Approve</button>' +
+                '<button data-reject-app="' + (a._id || a.id) + '" class="flex-1 bg-red-50 text-red-500 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition">Reject</button></div></div></div>';
+        }
+
+        async function updateVenueStatus(venueId, status) {
+            try {
+                var result = await API.patch('/turf/admin/venues/' + venueId + '/status', { body: { status: status } });
+                if (result.ok && result.data && result.data.success) {
+                    UI.toast('Venue status updated', 'success');
+                    loadApprovals();
+                    cachedStats = null;
+                } else { UI.toast(result.data?.message || 'Failed', 'error'); }
+            } catch (e) { UI.toast('Error: ' + e.message, 'error'); }
+        }
+
+        async function reviewOrgApp(appId, action) {
+            try {
+                var result = await API.post('/admin/organizer-applications/' + appId + '/review', { body: { action: action, reason: action === 'approve' ? 'Approved' : 'Rejected' } });
+                if (result.ok && result.data && result.data.success) {
+                    UI.toast('Application ' + action + 'd', 'success');
+                    loadApprovals();
+                } else { UI.toast(result.data?.message || 'Failed', 'error'); }
+            } catch (e) { UI.toast('Error: ' + e.message, 'error'); }
+        }
+
+        // ── Managers ───────────────────────────────────────────────────
+        async function loadManagers() {
+            try {
+                var result = await API.get('/admin/managers', { query: { limit: 50 } });
+                var managers = [];
+                if (result.ok && result.data && result.data.success) {
+                    managers = Array.isArray(result.data.data) ? result.data.data : [];
+                }
+                renderManagersList(managers);
+            } catch (e) {
+                document.getElementById('managersTable').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-400 text-sm">Failed to load managers.</td></tr>';
+            }
+        }
+
+        function renderManagersList(managers) {
+            if (managers.length === 0) {
+                document.getElementById('managersTable').innerHTML = '';
+                document.getElementById('managersEmpty').classList.remove('hidden');
+            } else {
+                document.getElementById('managersEmpty').classList.add('hidden');
+                document.getElementById('managersTable').innerHTML = managers.map(function (m) {
+                    var initials = (m.name || '?').split(' ').map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
+                    return '<tr class="hover:bg-gray-50/50">' +
+                        '<td class="py-3 px-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">' + initials + '</div><span class="font-medium">' + UI.escapeHtml(m.name || 'N/A') + '</span></div></td>' +
+                        '<td class="py-3 px-4 text-sm text-gray-500">' + UI.escapeHtml(m.email || '') + '</td>' +
+                        '<td class="py-3 px-4 text-sm">' + UI.escapeHtml(m.organization?.name || m.organizationId || '-') + '</td>' +
+                        '<td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-bold ' + (m.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600') + '">' + (m.isActive !== false ? 'Active' : 'Inactive') + '</span></td>' +
+                        '<td class="py-3 px-4"><button onclick="toggleManager(\'' + (m._id || m.id) + '\')" class="text-xs font-bold ' + (m.isActive !== false ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800') + '">' + (m.isActive !== false ? 'Deactivate' : 'Activate') + '</button></td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+
+        async function toggleManager(managerId) {
+            try {
+                var manager = window._managersCache && window._managersCache.find(function(m){ return (m._id||m.id)===managerId; });
+                var newStatus = manager && manager.isActive !== false;
+                if (newStatus) {
+                    await API.post('/admin/managers/' + managerId + '/deactivate');
+                } else {
+                    await API.post('/admin/managers/' + managerId + '/reactivate');
+                }
+                UI.toast('Manager updated', 'success');
+                loadManagers();
+            } catch (e) { UI.toast('Error: ' + e.message, 'error'); }
+        }
+
+        function showCreateManager() {
+            var orgId = prompt('Enter Organization ID:');
+            var email = prompt('Enter manager email:');
+            var name = prompt('Enter manager name:');
+            if (!orgId || !email || !name) return;
+            API.post('/admin/managers', { body: { organization_id: orgId, email: email, name: name } }).then(function (result) {
+                if (result.ok && result.data && result.data.success) {
+                    UI.toast('Manager created! Temp password: ' + (result.data.data?.tempPassword || 'check email'), 'success');
+                    loadManagers();
+                } else { UI.toast(result.data?.message || 'Failed to create manager', 'error'); }
+            }).catch(function (e) { UI.toast('Error: ' + e.message, 'error'); });
+        }
+
+        // ── Turfs ──────────────────────────────────────────────────────
+        async function loadAdminTurfs() {
+            try {
+                var result = await API.get('/turf/admin/venues', { query: { limit: 30 } });
+                var venues = [];
+                if (result.ok && result.data && result.data.success) {
+                    venues = Array.isArray(result.data.data) ? result.data.data : [];
+                }
+                if (venues.length === 0) { document.getElementById('adminTurfsEmpty').classList.remove('hidden'); }
+                else { document.getElementById('adminTurfsEmpty').classList.add('hidden'); }
+                document.getElementById('adminTurfsGrid').innerHTML = venues.map(function (v) {
+                    return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">' +
+                        '<div class="h-40 bg-gray-100 relative">' +
+                            '<img src="' + (v.image || 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=400&auto=format&fit=crop') + '" class="w-full h-full object-cover" alt="" onerror="this.style.display=\'none\'">' +
+                            '<span class="absolute top-3 right-3 px-2 py-1 rounded text-[10px] font-bold ' + getVenueStatusClass(v.status) + '">' + (v.status || 'unknown') + '</span>' +
+                        '</div>' +
+                        '<div class="p-4"><h3 class="font-bold text-dark">' + UI.escapeHtml(v.name || 'Venue') + '</h3>' +
+                        '<p class="text-xs text-gray-500 mt-1">' + UI.escapeHtml(v.location || '') + '</p>' +
+                        '<p class="text-xs text-gray-400">' + UI.escapeHtml((v.sport || '').toUpperCase()) + '</p></div></div>';
+                }).join('');
+            } catch (e) {
+                document.getElementById('adminTurfsGrid').innerHTML = '<div class="col-span-full text-center text-red-400 py-8">Failed to load venues.</div>';
+            }
+        }
+
+        function getVenueStatusClass(status) {
+            if (status === 'approved') return 'bg-green-100 text-green-700';
+            if (status === 'pending') return 'bg-yellow-100 text-yellow-700';
+            if (status === 'suspended') return 'bg-red-100 text-red-700';
+            return 'bg-gray-100 text-gray-600';
+        }
+
+        // ── Cinemas ────────────────────────────────────────────────────
+        async function loadAdminCinemas() {
+            try {
+                var result = await API.get('/admin/movies/cinemas', { query: { limit: 20 } });
+                var cinemas = [];
+                if (result.ok && result.data && result.data.success) {
+                    cinemas = Array.isArray(result.data.data) ? result.data.data : [];
+                }
+                if (cinemas.length === 0) { document.getElementById('adminCinemasEmpty').classList.remove('hidden'); }
+                else { document.getElementById('adminCinemasEmpty').classList.add('hidden'); }
+                document.getElementById('adminCinemasGrid').innerHTML = cinemas.map(function (c) {
+                    return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">' +
+                        '<h3 class="font-bold text-dark text-lg">' + UI.escapeHtml(c.name || 'Cinema') + '</h3>' +
+                        '<p class="text-xs text-gray-500 mt-1">' + UI.escapeHtml(c.city || c.location || '') + '</p>' +
+                        '<p class="text-xs text-gray-400 mt-1">' + (c.screens?.length || c.screenCount || 0) + ' screens</p>' +
+                        '<span class="inline-block mt-3 px-2 py-1 rounded text-[10px] font-bold ' + (c.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600') + '">' + (c.isActive !== false ? 'Active' : 'Inactive') + '</span></div>';
+                }).join('');
+            } catch (e) {
+                document.getElementById('adminCinemasGrid').innerHTML = '<div class="col-span-full text-center text-red-400 py-8">Failed to load cinemas.</div>';
+            }
+        }
+
+        // ── Events ─────────────────────────────────────────────────────
+        async function loadAdminEvents() {
+            try {
+                var result = await API.get('/admin/events', { query: { limit: 30 } });
+                var events = [];
+                if (result.ok && result.data && result.data.success) {
+                    events = Array.isArray(result.data.data) ? result.data.data : [];
+                }
+                if (events.length === 0) { document.getElementById('adminEventsEmpty').classList.remove('hidden'); }
+                else { document.getElementById('adminEventsEmpty').classList.add('hidden'); }
+                document.getElementById('adminEventsGrid').innerHTML = events.map(function (ev) {
+                    return '<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">' +
+                        '<div class="p-5">' +
+                            '<span class="inline-block px-2 py-1 rounded text-[10px] font-bold ' + getEventStatusClass(ev.status) + '">' + UI.escapeHtml(ev.status || 'draft') + '</span>' +
+                            '<h3 class="font-bold text-dark mt-2">' + UI.escapeHtml(ev.title || ev.name || 'Event') + '</h3>' +
+                            '<p class="text-xs text-gray-500 mt-1">' + UI.escapeHtml(ev.city || ev.location || '') + '</p>' +
+                            '<p class="text-xs text-gray-400 mt-1">' + UI.formatCurrency(ev.price || 0) + '</p>' +
+                        '</div></div>';
+                }).join('');
+            } catch (e) {
+                document.getElementById('adminEventsGrid').innerHTML = '<div class="col-span-full text-center text-red-400 py-8">Failed to load events.</div>';
+            }
+        }
+
+        function getEventStatusClass(status) {
+            if (status === 'published') return 'bg-green-100 text-green-700';
+            if (status === 'pending' || status === 'draft') return 'bg-yellow-100 text-yellow-700';
+            if (status === 'cancelled') return 'bg-red-100 text-red-700';
+            return 'bg-gray-100 text-gray-600';
+        }
+
+        function showCreateEvent() {
+            var title = prompt('Event title:');
+            if (!title) return;
+            API.post('/admin/events', { body: { title: title } }).then(function (result) {
+                if (result.ok && result.data && result.data.success) { UI.toast('Event created!', 'success'); loadAdminEvents(); }
+                else { UI.toast(result.data?.message || 'Failed', 'error'); }
+            }).catch(function (e) { UI.toast('Error: ' + e.message, 'error'); });
+        }
+
+        // ── Helpers ────────────────────────────────────────────────────
+        function getStatusClass(status) {
+            var s = (status || '').toLowerCase();
+            if (s === 'confirmed' || s === 'paid') return 'bg-green-100 text-green-700';
+            if (s === 'pending' || s === 'pending_payment') return 'bg-yellow-100 text-yellow-700';
+            if (s === 'cancelled' || s === 'canceled') return 'bg-red-100 text-red-700';
+            if (s === 'completed') return 'bg-blue-100 text-blue-700';
+            return 'bg-gray-100 text-gray-600';
+        }
+
+        function formatDate(val) {
+            if (!val) return '-';
+            try { return UI.formatDate(new Date(val)); } catch (e) { return String(val).substring(0, 10); }
+        }
+
+        // ── Expose globally ────────────────────────────────────────────
+        window.handleAdminLogin = handleAdminLogin;
+        window.handleAdminLogout = handleAdminLogout;
+        window.toggleSidebar = toggleSidebar;
+        window.toggleManager = toggleManager;
+        window.showCreateManager = showCreateManager;
+        window.showCreateEvent = showCreateEvent;
+        window.renderAdminBookings = renderAdminBookings;
+
+        // ── Init ──────────────────────────────────────────────────────
+        var existingToken = getAdminToken();
+        if (existingToken) {
+            document.getElementById('auth-view').classList.add('hidden-view');
+            document.getElementById('dashboard-view').classList.remove('hidden-view');
+            loadDashboard();
+        }
+    })();
+    </script>
+</body>
+</html>

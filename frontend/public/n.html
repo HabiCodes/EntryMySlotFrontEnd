@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EntryMySlot - Book Sports Venues & Turfs Near You</title>
+    <meta name="description" content="Turf booking platform frontend.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        custom: {
+                            light: '#f05a28', /* The requested orange color */
+                            dark: '#262626',  /* The requested dark grey/black color */
+                            darkHover: '#1a1a1a', /* Slightly darker shade for hover states */
+                            lightHover: '#e04c1a' /* Slightly darker orange for hover */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar hiding for horizontal lists */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .card-zoom-image {
+            transition: transform 0.4s ease;
+        }
+        .card-zoom:hover .card-zoom-image {
+            transform: scale(1.05);
+        }
+
+        /* Custom selection color */
+        ::selection {
+            background-color: #f05a28;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="bg-white font-sans text-custom-dark">
+
+    <header class="bg-custom-dark text-white sticky top-0 z-50 shadow-md border-b border-custom-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <!-- Logo and Search -->
+                <div class="flex items-center flex-1">
+                    <a href="#" class="flex-shrink-0 mr-4 sm:mr-6 flex items-center group">
+                        <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
+                    </a>
+                    <div class="hidden sm:block flex-1 max-w-2xl">
+                        <div class="relative bg-white/10 rounded-md flex items-center px-3 py-2 h-10 w-full shadow-inner border border-transparent focus-within:border-custom-light transition-colors">
+                            <i class="fa-solid fa-magnifying-glass text-white/60 mr-3"></i>
+                            <input type="text"
+                                class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-white/60"
+                                placeholder="Search for Turfs, Courts, Grounds...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location and Sign In -->
+                <div class="flex items-center space-x-3 sm:space-x-6 ml-4 sm:ml-6 relative">
+                    <i class="fa-solid fa-magnifying-glass text-white sm:hidden text-lg cursor-pointer" ></i>
+                    
+                    <div class="relative">
+                        <button data-location-open class="flex items-center text-white hover:text-custom-light text-xs sm:text-sm font-medium transition" >
+                            <span data-location-target="name" id="desktopLoc" class="hidden sm:inline">Coimbatore</span><span data-location-target="code" id="mobileLoc" class="sm:hidden">CBE</span> <i
+                                class="fa-solid fa-chevron-down ml-1 sm:ml-2 text-[10px] sm:text-xs"></i>
+                        </button></div>
+
+                    <button
+                        class="bg-custom-light text-white px-3 sm:px-4 py-1.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-bold hover:bg-custom-lightHover transition shadow-sm whitespace-nowrap interactive-btn" data-action="login">
+                        Login / Register
+                    </button>
+                    <button class="text-white hover:text-custom-light transition block md:hidden" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-custom-dark/95 backdrop-blur-md text-white text-sm border-b border-custom-dark shadow-sm relative z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-12">
+                <div
+                    class="flex overflow-x-auto hide-scrollbar space-x-6 sm:space-x-8 whitespace-nowrap w-full md:w-auto -mx-4 px-4 md:mx-0 md:px-0">
+                    <a href="#" class="font-bold hover:text-custom-light transition py-2 border-b-2 border-transparent hover:border-custom-light">Turfs</a>
+                    <a href="#" class="font-bold hover:text-custom-light transition py-2 border-b-2 border-transparent hover:border-custom-light">Concerts</a>
+                    <a href="#" class="font-bold hover:text-custom-light transition py-2 border-b-2 border-transparent hover:border-custom-light">Events</a>
+                    <a href="#" class="font-bold hover:text-custom-light transition py-2 border-b-2 border-transparent hover:border-custom-light">Movies</a>
+                    <a href="#" class="font-bold hover:text-custom-light transition py-2 border-b-2 border-transparent hover:border-custom-light">Standup Comedy</a>
+                </div>
+                <div class="hidden md:flex space-x-6 text-xs font-bold">
+                    <a href="#" class="hover:text-custom-light transition">List Your Venue</a>
+                    <a href="#" class="hover:text-custom-light transition">Corporate Events</a>
+                    <a href="#" class="text-custom-light hover:text-white transition">Offers</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="homeView" class="block transition-opacity duration-300">
+        <div class="bg-gray-50 py-4 sm:py-6">
+            <div class="max-w-7xl mx-auto relative group px-4 sm:px-6 lg:px-8">
+            <!-- Carousel -->
+            <div class="relative overflow-hidden rounded-lg sm:rounded-xl h-48 sm:h-72 md:h-[400px] shadow-lg bg-custom-dark">
+
+                <div class="carousel-slide absolute inset-0 w-full h-full transition-opacity duration-500 opacity-100">
+                    <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop"
+                         alt="Banner 1" class="w-full h-full object-cover opacity-50 mix-blend-overlay">
+                    <div class="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16">
+                        <span class="bg-custom-light text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-3 shadow">Weekend Offer</span>
+                        <h2 class="text-3xl md:text-5xl font-bold mb-3 text-white drop-shadow-md">Play Under The Lights</h2>
+                        <p class="text-sm md:text-lg mb-6 max-w-md text-gray-200 drop-shadow">Book premium 5-a-side football turfs and get 20% off on midnight slots.</p>
+                        <button class="bg-custom-light text-white px-6 py-2.5 rounded font-bold text-sm hover:bg-custom-lightHover transition shadow-md">Book Now</button>
+                    </div>
+                </div>
+
+                <div class="carousel-slide absolute inset-0 w-full h-full transition-opacity duration-500 opacity-0 bg-custom-dark">
+                    <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1200&auto=format&fit=crop"
+                         alt="Banner 2" class="w-full h-full object-cover opacity-50 mix-blend-overlay">
+                    <div class="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16">
+                        <span class="bg-custom-light text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mb-3 shadow">New Venues</span>
+                        <h2 class="text-3xl md:text-5xl font-bold mb-3 text-white drop-shadow-md">Cricket Box Leagues</h2>
+                        <p class="text-sm md:text-lg mb-6 max-w-md text-gray-200 drop-shadow">Discover the best indoor and outdoor box cricket pitches near you.</p>
+                        <button class="bg-custom-light text-white px-6 py-2.5 rounded font-bold text-sm hover:bg-custom-lightHover transition shadow-md">Explore Pitches</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Left Arrow -->
+            <button
+                id="prevBtn"
+                class="absolute top-1/2 -translate-y-1/2 left-6 md:left-2 z-20 bg-white shadow-lg hover:bg-gray-100 text-custom-dark h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full transition opacity-0 group-hover:opacity-100 border border-gray-200">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <!-- Right Arrow -->
+            <button
+                id="nextBtn"
+                class="absolute top-1/2 -translate-y-1/2 right-6 md:right-2 z-20 bg-white shadow-lg hover:bg-gray-100 text-custom-dark h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full transition opacity-0 group-hover:opacity-100 border border-gray-200">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll(".carousel-slide");
+        const nextBtn = document.getElementById("nextBtn");
+        const prevBtn = document.getElementById("prevBtn");
+
+        let current = 0;
+        let autoSlide;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle("opacity-100", i === index);
+                slide.classList.toggle("opacity-0", i !== index);
+                slide.style.zIndex = i === index ? "10" : "0";
+            });
+        }
+
+        function nextSlide() {
+            current = (current + 1) % slides.length;
+            showSlide(current);
+        }
+
+        function prevSlide() {
+            current = (current - 1 + slides.length) % slides.length;
+            showSlide(current);
+        }
+
+        nextBtn.addEventListener("click", () => {
+            nextSlide();
+            restartAutoSlide();
+        });
+
+        prevBtn.addEventListener("click", () => {
+            prevSlide();
+            restartAutoSlide();
+        });
+
+        function restartAutoSlide() {
+            clearInterval(autoSlide);
+            autoSlide = setInterval(nextSlide, 5000);
+        }
+
+        showSlide(current);
+        autoSlide = setInterval(nextSlide, 5000);
+    </script>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-white">
+
+        <!-- Turfs Section Header -->
+        <div class="flex justify-between items-end mb-6 sm:mb-8">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-custom-dark">Top Rated Venues near <span data-location-target="name">Coimbatore</span></h2>
+                <p class="text-sm text-gray-500 mt-1 hidden sm:block font-medium">Book premium sports facilities around your area</p>
+            </div>
+            <a href="#" class="text-custom-light text-sm font-bold hover:underline flex items-center">
+                See All <i class="fa-solid fa-chevron-right ml-1 text-xs"></i>
+            </a>
+        </div>
+
+        <!-- Turf Cards Wrapper -->
+        <div class="flex overflow-x-auto hide-scrollbar space-x-4 sm:space-x-6 pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+
+            <!-- Turf 1 -->
+            <a href="#" class="flex-none w-64 sm:w-72 md:w-80 group cursor-pointer card-zoom block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1552667466-07770ae110d0?q=80&w=600&auto=format&fit=crop"
+                        alt="Kickoff Arena"
+                        class="card-zoom-image w-full h-full object-cover">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-custom-dark flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-star text-yellow-400"></i> 4.8
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-lg font-bold text-custom-dark leading-tight truncate">Kickoff Arena</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 font-medium"><i class="fa-solid fa-location-dot mr-1 text-custom-light"></i>Saravanampatti</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Football</span>
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">7v7</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <span class="text-sm font-bold text-custom-dark">₹1,200 <span class="text-xs font-normal text-gray-400">/hr</span></span>
+                        <span class="text-xs font-bold bg-custom-light text-white px-4 py-1.5 rounded hover:bg-custom-lightHover transition">Book</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Turf 2 -->
+            <a href="#" class="flex-none w-64 sm:w-72 md:w-80 group cursor-pointer card-zoom block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=600&auto=format&fit=crop"
+                        alt="Smash Court"
+                        class="card-zoom-image w-full h-full object-cover">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-custom-dark flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-star text-yellow-400"></i> 4.6
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-lg font-bold text-custom-dark leading-tight truncate">Smash Court</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 font-medium"><i class="fa-solid fa-location-dot mr-1 text-custom-light"></i>Peelamedu</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Badminton</span>
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Synthetic</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <span class="text-sm font-bold text-custom-dark">₹400 <span class="text-xs font-normal text-gray-400">/hr</span></span>
+                        <span class="text-xs font-bold bg-custom-light text-white px-4 py-1.5 rounded hover:bg-custom-lightHover transition">Book</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Turf 3 -->
+            <a href="#" class="flex-none w-64 sm:w-72 md:w-80 group cursor-pointer card-zoom block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=600&auto=format&fit=crop"
+                        alt="Pitch Perfect Box"
+                        class="card-zoom-image w-full h-full object-cover">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-custom-dark flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-star text-yellow-400"></i> 4.9
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-lg font-bold text-custom-dark leading-tight truncate">Pitch Perfect Box</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 font-medium"><i class="fa-solid fa-location-dot mr-1 text-custom-light"></i>RS Puram</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Box Cricket</span>
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">24x7</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <span class="text-sm font-bold text-custom-dark">₹1,500 <span class="text-xs font-normal text-gray-400">/hr</span></span>
+                        <span class="text-xs font-bold bg-custom-light text-white px-4 py-1.5 rounded hover:bg-custom-lightHover transition">Book</span>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- Turf 4 -->
+            <a href="#" class="flex-none w-64 sm:w-72 md:w-80 group cursor-pointer card-zoom block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div class="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=600&auto=format&fit=crop"
+                        alt="The Grand Slam"
+                        class="card-zoom-image w-full h-full object-cover">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-custom-dark flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-star text-yellow-400"></i> 4.5
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-lg font-bold text-custom-dark leading-tight truncate">The Grand Slam</h3>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 font-medium"><i class="fa-solid fa-location-dot mr-1 text-custom-light"></i>Race Course</p>
+                    <div class="flex gap-2 mb-4">
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Tennis</span>
+                        <span class="text-[10px] bg-gray-100 text-custom-dark font-bold px-2 py-1 rounded">Clay Court</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <span class="text-sm font-bold text-custom-dark">₹600 <span class="text-xs font-normal text-gray-400">/hr</span></span>
+                        <span class="text-xs font-bold bg-custom-light text-white px-4 py-1.5 rounded hover:bg-custom-lightHover transition">Book</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Promo Lead-in Banner -->
+        <div class="mt-12 sm:mt-16 mb-12 sm:mb-16 cursor-pointer -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div class="w-full bg-custom-dark rounded-xl sm:rounded-2xl shadow-xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between hover:shadow-2xl transition-all relative overflow-hidden group">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 rounded-full bg-custom-light/20 blur-2xl group-hover:bg-custom-light/30 transition-colors duration-500"></div>
+                <div class="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 rounded-full bg-custom-light/10 blur-xl"></div>
+                
+                <div class="mb-6 md:mb-0 relative z-10 text-center md:text-left">
+                    <span class="bg-custom-light text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider mb-3 inline-block">Tournaments</span>
+                    <h3 class="text-2xl md:text-3xl font-bold mb-2 text-white">Join the Weekend League</h3>
+                    <p class="text-sm md:text-base text-gray-300 font-medium">Compete with local teams and win exciting prizes!</p>
+                </div>
+                <button class="bg-custom-light text-white font-bold px-8 py-3 rounded-lg hover:bg-custom-lightHover transition-colors shadow-lg relative z-10 w-full md:w-auto interactive-btn" data-action="register-team">Register Team</button>
+            </div>
+        </div>
+
+        <!-- Browse By Sports Section -->
+        <div class="mb-6 sm:mb-8 mt-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-custom-dark">Browse by Sports</h2>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 pb-8">
+            <!-- Sport Category 1 -->
+            <a href="category.html?sport=football" class="group cursor-pointer flex flex-col items-center bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-custom-light text-center">
+                <div class="w-16 h-16 rounded-full bg-white text-custom-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:bg-custom-light group-hover:text-white border border-gray-100">
+                    <i class="fa-regular fa-futbol text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-base text-custom-dark">Football</h3>
+                <p class="text-xs text-gray-400 mt-1 font-medium">24 Venues</p>
+            </a>
+
+            <!-- Sport Category 2 -->
+            <a href="category.html?sport=cricket" class="group cursor-pointer flex flex-col items-center bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-custom-light text-center">
+                <div class="w-16 h-16 rounded-full bg-white text-custom-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:bg-custom-light group-hover:text-white border border-gray-100">
+                    <i class="fa-solid fa-baseball-bat-ball text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-base text-custom-dark">Cricket</h3>
+                <p class="text-xs text-gray-400 mt-1 font-medium">18 Venues</p>
+            </a>
+
+            <!-- Sport Category 3 -->
+            <a href="category.html?sport=badminton" class="group cursor-pointer flex flex-col items-center bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-custom-light text-center">
+                <div class="w-16 h-16 rounded-full bg-white text-custom-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:bg-custom-light group-hover:text-white border border-gray-100">
+                    <i class="fa-solid fa-table-tennis-paddle-ball text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-base text-custom-dark">Badminton</h3>
+                <p class="text-xs text-gray-400 mt-1 font-medium">32 Venues</p>
+            </a>
+
+            <!-- Sport Category 4 -->
+            <a href="category.html?sport=tennis" class="group cursor-pointer flex flex-col items-center bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-custom-light text-center">
+                <div class="w-16 h-16 rounded-full bg-white text-custom-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:bg-custom-light group-hover:text-white border border-gray-100">
+                    <i class="fa-solid fa-baseball text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-base text-custom-dark">Tennis</h3>
+                <p class="text-xs text-gray-400 mt-1 font-medium">9 Venues</p>
+            </a>
+
+            <!-- Sport Category 5 -->
+            <a href="category.html?sport=basketball" class="group cursor-pointer flex flex-col items-center bg-gray-50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-custom-light text-center">
+                <div class="w-16 h-16 rounded-full bg-white text-custom-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm group-hover:bg-custom-light group-hover:text-white border border-gray-100">
+                    <i class="fa-solid fa-basketball text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-base text-custom-dark">Basketball</h3>
+                <p class="text-xs text-gray-400 mt-1 font-medium">14 Venues</p>
+            </a>
+        </div>
+    </main>
+    </div>
+
+    <div id="bookingView" class="hidden transition-opacity duration-300 min-h-screen bg-gray-50 pb-12">
+        <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
+                <button onclick="closeBookingPage()" class="text-custom-dark hover:text-custom-light transition-colors flex items-center font-bold text-sm sm:text-base bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg shadow-sm">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Home
+                </button>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Left: Turf Details -->
+                <div class="w-full lg:w-1/3">
+                    <div class="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg sticky top-24">
+                        <img id="bookingTurfImage" src="" alt="Turf" class="w-full h-56 sm:h-72 object-cover">
+                        <div class="p-6 sm:p-8">
+                            <h2 id="bookingTurfName" class="text-2xl font-bold text-custom-dark mb-2">Turf Name</h2>
+                            <p id="bookingTurfLocation" class="text-gray-500 text-sm font-medium mb-6 flex items-center"><i class="fa-solid fa-location-dot mr-2 text-custom-light"></i> Location</p>
+                            <div class="flex items-center gap-2 mb-8">
+                                <span class="bg-gray-100 text-custom-dark text-xs font-bold px-3 py-1.5 rounded-md shadow-sm border border-gray-200">Football</span>
+                                <span class="bg-gray-100 text-custom-dark text-xs font-bold px-3 py-1.5 rounded-md shadow-sm border border-gray-200">Synthetic</span>
+                            </div>
+                            <div class="border-t border-gray-200 pt-6">
+                                <p class="text-sm text-gray-500 font-bold mb-1 uppercase tracking-wider">Base Price</p>
+                                <p class="text-3xl font-bold text-custom-dark">₹<span id="bookingTurfPrice">0</span> <span class="text-sm font-medium text-gray-400">/ slot</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Slot Selection -->
+                <div class="w-full lg:w-2/3">
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200 mb-8">
+                        <h3 class="text-xl font-bold text-custom-dark mb-6 border-b border-gray-100 pb-4">Select Date</h3>
+                        
+                        <!-- Date Selector -->
+                        <div class="flex overflow-x-auto hide-scrollbar space-x-3 mb-2 pb-4" id="dateSelector">
+                            <!-- Dates generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Slots Grid -->
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200 mb-8">
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                            <h3 class="text-xl font-bold text-custom-dark">Available Slots</h3>
+                            <span class="text-xs font-bold text-custom-light bg-custom-light/10 px-3 py-1.5 rounded-md border border-custom-light/20">Select multiple</span>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3" id="slotGrid">
+                            <!-- Slots generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Summary & Checkout -->
+                    <div class="bg-custom-dark text-white p-6 sm:p-8 rounded-2xl shadow-xl border-t-4 border-custom-light relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+                        <h4 class="font-bold text-xl mb-6 flex items-center"><i class="fa-solid fa-receipt mr-2 text-custom-light"></i> Booking Summary</h4>
+                        <div class="space-y-3 mb-6 text-sm font-medium">
+                            <div class="flex justify-between border-b border-white/10 pb-3">
+                                <span class="text-gray-300">Selected Slots (<span id="summarySlotCount" class="text-white font-bold">0</span>)</span>
+                                <span>₹<span id="summarySubtotal">0</span></span>
+                            </div>
+                            <div class="flex justify-between text-gray-400 text-xs border-b border-white/10 pb-3">
+                                <span>Taxes & Fees (18%)</span>
+                                <span>+ ₹<span id="summaryTaxes">0</span></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-end mb-8">
+                            <span class="font-bold text-gray-300 text-lg">Total Amount</span>
+                            <span class="font-bold text-3xl text-custom-light">₹<span id="summaryTotal">0</span></span>
+                        </div>
+                        <button id="proceedToPayBtn" disabled class="w-full bg-custom-light text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-custom-lightHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-custom-light">
+                            Proceed to Pay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-custom-dark text-gray-300 mt-12 pt-16 pb-24 sm:pb-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- List your venue banner in footer -->
+            <div
+                class="flex flex-col md:flex-row items-center justify-between bg-[#1f1f1f] px-8 py-8 rounded-2xl mb-12 border border-gray-800 shadow-xl text-center md:text-left space-y-6 md:space-y-0 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-custom-light/10 to-transparent"></div>
+                <div class="flex flex-col md:flex-row items-center relative z-10">
+                    <div class="w-16 h-16 rounded-full bg-custom-light/20 border border-custom-light/30 flex items-center justify-center text-custom-light text-3xl md:mr-6 mb-4 md:mb-0">
+                         <i class="fa-solid fa-building-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-xl mb-1">List your Turf or Sports Venue</h3>
+                        <p class="text-sm text-gray-400 font-medium">Are you a venue owner? Partner with us to increase your bookings instantly.</p>
+                    </div>
+                </div>
+                <button
+                    class="bg-white text-custom-dark px-8 py-3 rounded-lg shadow-md font-bold hover:bg-custom-light hover:text-white transition-colors w-full md:w-auto relative z-10">
+                    Partner With Us
+                </button>
+            </div>
+
+            <!-- Support Links Grid -->
+            <div
+                class="grid grid-cols-3 gap-4 sm:flex sm:justify-center sm:space-x-20 border-b border-gray-800 pb-12 mb-12 text-center">
+                <div class="flex flex-col items-center hover:text-custom-light cursor-pointer transition-colors group">
+                    <div
+                        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1f1f1f] border border-gray-800 flex items-center justify-center mb-3 group-hover:bg-custom-light/10 group-hover:border-custom-light/30 transition-all">
+                        <i class="fa-solid fa-headset text-xl sm:text-2xl text-gray-400 group-hover:text-custom-light"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-xs tracking-wider uppercase leading-tight font-bold text-gray-400 group-hover:text-custom-light">24/7<br
+                            class="sm:hidden"> Support</span>
+                </div>
+                <div class="flex flex-col items-center hover:text-custom-light cursor-pointer transition-colors group">
+                    <div
+                        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1f1f1f] border border-gray-800 flex items-center justify-center mb-3 group-hover:bg-custom-light/10 group-hover:border-custom-light/30 transition-all">
+                        <i class="fa-regular fa-calendar-check text-xl sm:text-2xl text-gray-400 group-hover:text-custom-light"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-xs tracking-wider uppercase leading-tight font-bold text-gray-400 group-hover:text-custom-light">Resend<br
+                            class="sm:hidden"> Booking</span>
+                </div>
+                <div class="flex flex-col items-center hover:text-custom-light cursor-pointer transition-colors group">
+                    <div
+                        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1f1f1f] border border-gray-800 flex items-center justify-center mb-3 group-hover:bg-custom-light/10 group-hover:border-custom-light/30 transition-all">
+                        <i class="fa-solid fa-envelope-open-text text-xl sm:text-2xl text-gray-400 group-hover:text-custom-light"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-xs tracking-wider uppercase leading-tight font-bold text-gray-400 group-hover:text-custom-light">Newsletter<br
+                            class="sm:hidden"> Signup</span>
+                </div>
+            </div>
+
+            <!-- Main Link Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-16">
+                <div>
+                    <h4 class="text-white text-sm font-bold mb-6 uppercase tracking-wider">Top Turfs near <span data-location-target="name">Coimbatore</span></h4>
+                    <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Kickoff Arena, Saravanampatti</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Pitch Perfect Box, RS Puram</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Smash Court, Peelamedu</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">The Grand Slam, Race Course</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Hoops Central, Avinashi Rd</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white text-sm font-bold mb-6 uppercase tracking-wider">Sports Available</h4>
+                    <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Football Turfs</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Box Cricket</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Badminton Courts</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Tennis Courts</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Swimming Pools</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white text-sm font-bold mb-6 uppercase tracking-wider">Quick Links</h4>
+                    <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Upcoming Tournaments</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Corporate Bookings</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Membership Plans</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Gift Cards</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Offers & Promos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white text-sm font-bold mb-6 uppercase tracking-wider">Help & Support</h4>
+                    <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-custom-light transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Cancellation Policy</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">FAQs</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Terms and Conditions</a></li>
+                        <li><a href="#" class="hover:text-custom-light transition-colors">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="border-t border-gray-800 pt-10 flex flex-col justify-center items-center">
+                <a href="#" class="flex items-center justify-center mb-8">
+                    <img src="assets/images/logo.png" alt="EntryMySlot Logo" class="h-12 sm:h-16 w-auto object-contain drop-shadow-lg opacity-80 hover:opacity-100 transition-opacity">
+                 </a>
+
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <a href="https://facebook.com" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all duration-200" title="Facebook">
+                        <i class="fa-brands fa-facebook-f text-sm"></i></a>
+                    <a href="https://x.com" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white transition-all duration-200" title="X (Twitter)">
+                        <i class="fa-brands fa-x-twitter text-sm"></i></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#E4405F] hover:text-white transition-all duration-200" title="Instagram">
+                        <i class="fa-brands fa-instagram text-sm"></i></a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all duration-200" title="YouTube">
+                        <i class="fa-brands fa-youtube text-sm"></i></a>
+                    <a href="https://wa.me" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#25D366] hover:text-white transition-all duration-200" title="WhatsApp">
+                        <i class="fa-brands fa-whatsapp text-sm"></i></a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener"
+                        class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#0A66C2] hover:text-white transition-all duration-200" title="LinkedIn">
+                        <i class="fa-brands fa-linkedin-in text-sm"></i></a>
+                </div>
+
+                <p class="text-[10px] sm:text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed font-medium">
+                    Copyright 2026 © EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.<br>
+                    The content and images used on this site are intended to demonstrate the UI capabilities. 
+                    Unsplash image placeholders are used for representative purposes of sports venues.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <div
+        class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40" id="mobileBottomNav">
+        <a href="#" class="mobile-nav-btn flex flex-col items-center text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-solid fa-house text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="#" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light transition p-2 rounded-lg w-16" onclick="document.querySelector('input').focus(); event.preventDefault();">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Search</span>
+        </a>
+        <a href="#" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light transition p-2 rounded-lg w-16 interactive-btn" data-action="bookings">
+            <i class="fa-regular fa-calendar-check text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Bookings</span>
+        </a>
+        <a href="#" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light transition p-2 rounded-lg w-16 interactive-btn" data-action="login">
+            <i class="fa-regular fa-user text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </div>
+
+    <!-- UI Overlay Components -->
+    <!-- Mobile Sidebar Menu -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-custom-dark/80 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-300" onclick="toggleSidebar()"></div>
+    <div id="mobileSidebar" class="fixed inset-y-0 right-0 w-72 bg-white z-[100] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div class="p-5 bg-custom-dark text-white flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-futbol text-2xl text-custom-light"></i>
+                <span class="font-bold text-lg">EntryMySlot</span>
+            </div>
+            <button class="hover:text-custom-light transition p-1" onclick="toggleSidebar()"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-2 text-custom-dark bg-gray-50">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-2">Sports</p>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition flex items-center"><i class="fa-regular fa-futbol w-6 text-center mr-3 text-custom-light"></i> Football</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition flex items-center"><i class="fa-solid fa-baseball-bat-ball w-6 text-center mr-3 text-custom-light"></i> Cricket</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition flex items-center"><i class="fa-solid fa-table-tennis-paddle-ball w-6 text-center mr-3 text-custom-light"></i> Badminton</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition flex items-center"><i class="fa-solid fa-baseball w-6 text-center mr-3 text-custom-light"></i> Tennis</a>
+            
+            <hr class="border-gray-200 my-6">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Services</p>
+            
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">List Your Venue</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">Corporate Events</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">Offers</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">Help & Support</a>
+        </div>
+    </div>
+
+    <!-- Reusable Global Modal -->
+    <div id="uiModal" class="fixed inset-0 z-[100] hidden bg-custom-dark/90 backdrop-blur-md flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300" id="uiModalContent">
+            <div class="bg-white border-b border-gray-100 text-custom-dark px-6 py-5 flex justify-between items-center sticky top-0 z-10">
+                <h3 id="uiModalTitle" class="font-bold text-xl tracking-wide">Action</h3>
+                <button id="uiModalClose" class="text-gray-400 hover:text-custom-dark transition bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="uiModalBody" class="p-6 sm:p-8 text-custom-dark bg-gray-50">
+                <!-- Dynamic Content Goes Here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Allow horizontal scrolling on touch and wheel events for the carousels
+        document.querySelectorAll('.overflow-x-auto').forEach(container => {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                container.classList.add('cursor-grabbing');
+                startX = e.pageX - container.offsetLeft;
+                scrollLeft = container.scrollLeft;
+            });
+            container.addEventListener('mouseleave', () => {
+                isDown = false;
+                container.classList.remove('cursor-grabbing');
+            });
+            container.addEventListener('mouseup', () => {
+                isDown = false;
+                container.classList.remove('cursor-grabbing');
+            });
+            container.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const walk = (x - startX) * 2; 
+                container.scrollLeft = scrollLeft - walk;
+            });
+        });
+
+        // Modal logic
+        const modal = document.getElementById('uiModal');
+        const modalContent = document.getElementById('uiModalContent');
+        const modalTitle = document.getElementById('uiModalTitle');
+        const modalBody = document.getElementById('uiModalBody');
+
+        function openModal(title, content) {
+            modalTitle.innerText = title;
+            modalBody.innerHTML = content;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
+        });
+
+        // Sidebar logic
+        const sidebar = document.getElementById('mobileSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if(isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.add('opacity-0');
+                setTimeout(() => sidebarOverlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // Location state managed by js/location-state.js (EMS_LOCATION)
+        // Location state managed by js/location-state.js (EMS_LOCATION)
+        });
+
+        // Mobile Nav Active State Toggling
+        const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
+        mobileNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active classes from all and set to grey
+                mobileNavBtns.forEach(b => {
+                    b.classList.remove('text-custom-light');
+                    b.classList.add('text-gray-400');
+                });
+                // Add active class (custom-light / orange) to clicked
+                btn.classList.remove('text-gray-400');
+                btn.classList.add('text-custom-light');
+            });
+        });
+
+        // Bind dynamic interactions to all buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const interactives = document.querySelectorAll('button, .card-zoom span.bg-custom-light, a.interactive-btn');
+            
+            interactives.forEach(btn => {
+                if(btn.hasAttribute('onclick') && !btn.classList.contains('mobile-nav-btn')) return;
+
+                btn.addEventListener('click', (e) => {
+                    const text = btn.innerText.trim().toLowerCase();
+                    const action = btn.dataset.action;
+                    
+                    if (btn.tagName === 'A' || btn.tagName === 'SPAN') e.preventDefault();
+
+                    if (text.includes('login') || text.includes('register') || action === 'login') {
+                        openModal('Login / Register', `
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-2 block uppercase tracking-wide">Mobile Number</label>
+                                    <div class="flex shadow-sm rounded-lg overflow-hidden">
+                                        <span class="inline-flex items-center px-4 border border-r-0 border-gray-300 bg-gray-100 text-gray-500 sm:text-sm font-bold">
+                                            +91
+                                        </span>
+                                        <input type="tel" placeholder="Enter your mobile number" class="flex-1 min-w-0 block w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-custom-light focus:border-transparent sm:text-sm font-medium bg-white transition-shadow">
+                                    </div>
+                                </div>
+                                <button class="w-full bg-custom-light text-white py-3 rounded-lg font-bold shadow-md hover:bg-custom-lightHover transition-colors" onclick="closeModal()">Continue with Mobile</button>
+                                
+                                <div class="relative my-6">
+                                    <div class="absolute inset-0 flex items-center">
+                                        <div class="w-full border-t border-gray-300"></div>
+                                    </div>
+                                    <div class="relative flex justify-center text-sm">
+                                        <span class="px-2 bg-gray-50 text-gray-500 font-medium">Or continue with</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button class="flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors">
+                                        <i class="fa-brands fa-google text-red-500 mr-2 text-lg"></i>
+                                        <span class="text-sm font-bold text-gray-700">Google</span>
+                                    </button>
+                                    <button class="flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors">
+                                        <i class="fa-brands fa-apple text-gray-900 mr-2 text-xl mb-1"></i>
+                                        <span class="text-sm font-bold text-gray-700">Apple</span>
+                                    </button>
+                                </div>
+                                
+                                <p class="text-xs text-center text-gray-500 mt-4 font-medium">By continuing, you agree to our <a href="#" class="text-custom-light hover:underline">Terms & Conditions</a>.</p>
+                            </div>
+                        `);
+                    } else if (action === 'register-team') {
+                        openModal('Register Team for League', `
+                            <form class="space-y-4" onsubmit="event.preventDefault(); alert('Registration submitted!'); closeModal();">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-1 block uppercase">Team Name</label>
+                                    <input type="text" required placeholder="E.g., The Invincibles" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-light focus:border-transparent outline-none text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-1 block uppercase">Captain's Name</label>
+                                    <input type="text" required placeholder="Full Name" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-light focus:border-transparent outline-none text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-1 block uppercase">Contact Number</label>
+                                    <input type="tel" required placeholder="10-digit mobile number" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-light focus:border-transparent outline-none text-sm font-medium">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-1 block uppercase">Sport Category</label>
+                                    <select class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-light focus:border-transparent outline-none text-sm font-medium bg-white">
+                                        <option>5v5 Football</option>
+                                        <option>Box Cricket</option>
+                                        <option>Badminton Doubles</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 mb-1 block uppercase">Team Size</label>
+                                    <input type="number" min="2" max="15" required placeholder="Number of players" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-light focus:border-transparent outline-none text-sm font-medium">
+                                </div>
+                                <div class="pt-4">
+                                    <button type="submit" class="w-full bg-custom-light text-white py-3 rounded-lg font-bold shadow-md hover:bg-custom-lightHover transition-colors">Submit Registration</button>
+                                </div>
+                            </form>
+                        `);
+                    } else if (text === 'book') {
+                        const card = btn.closest('.card-zoom');
+                        
+                        const turfName = card ? card.querySelector('h3').innerText : 'Selected Turf';
+                        const locationText = card ? card.querySelector('p').innerText : 'Location';
+                        const priceText = card ? card.querySelector('.border-t span.text-sm').innerText : '1200';
+                        const price = parseInt(priceText.replace(/[^0-9]/g, '')) || 1200;
+                        const image = card ? card.querySelector('img').src : '';
+                        
+                        openBookingPage({
+                            name: turfName,
+                            location: locationText.trim(),
+                            price: price,
+                            image: image
+                        });
+                    }
+                });
+            });
+        });
+
+        // Booking Page Logic
+        const homeView = document.getElementById('homeView');
+        const bookingView = document.getElementById('bookingView');
+        
+        let currentBookingState = {
+            price: 0,
+            selectedSlots: [],
+            taxRate: 0.18
+        };
+
+        function openBookingPage(turf) {
+            // Populate Data
+            document.getElementById('bookingTurfName').innerText = turf.name;
+            document.getElementById('bookingTurfLocation').innerHTML = `<i class="fa-solid fa-location-dot mr-2 text-custom-light"></i> ${turf.location}`;
+            document.getElementById('bookingTurfPrice').innerText = turf.price;
+            document.getElementById('bookingTurfImage').src = turf.image;
+            
+            currentBookingState.price = turf.price;
+            currentBookingState.selectedSlots = [];
+            
+            generateDates();
+            generateSlots();
+            updateBookingSummary();
+            
+            // Switch Views
+            homeView.classList.add('hidden');
+            window.scrollTo(0,0);
+            bookingView.classList.remove('hidden');
+        }
+
+        function closeBookingPage() {
+            bookingView.classList.add('hidden');
+            homeView.classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function generateDates() {
+            const container = document.getElementById('dateSelector');
+            container.innerHTML = '';
+            
+            const today = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            for(let i=0; i<7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                const isSelected = i === 0;
+                const activeClass = isSelected ? 'bg-custom-light text-white border-custom-light shadow-md' : 'bg-white text-custom-dark border-gray-200 hover:border-custom-light/50';
+                
+                const btn = document.createElement('button');
+                btn.className = `flex-none flex flex-col items-center justify-center w-16 h-20 rounded-xl border-2 transition-all duration-200 ${activeClass} date-btn`;
+                btn.innerHTML = `
+                    <span class="text-xs font-bold mb-1 opacity-80">${days[date.getDay()]}</span>
+                    <span class="text-xl font-bold">${date.getDate()}</span>
+                    <span class="text-[10px] font-bold opacity-80">${months[date.getMonth()]}</span>
+                `;
+                
+                btn.onclick = () => {
+                    document.querySelectorAll('.date-btn').forEach(b => {
+                        b.className = `flex-none flex flex-col items-center justify-center w-16 h-20 rounded-xl border-2 transition-all duration-200 bg-white text-custom-dark border-gray-200 hover:border-custom-light/50 date-btn`;
+                    });
+                    btn.className = `flex-none flex flex-col items-center justify-center w-16 h-20 rounded-xl border-2 transition-all duration-200 bg-custom-light text-white border-custom-light shadow-md date-btn`;
+                    // Reset slots on date change
+                    currentBookingState.selectedSlots = [];
+                    generateSlots();
+                    updateBookingSummary();
+                };
+                
+                container.appendChild(btn);
+            }
+        }
+
+        function generateSlots() {
+            const container = document.getElementById('slotGrid');
+            container.innerHTML = '';
+            
+            // Generate some random slots (6 AM to 11 PM)
+            for(let i=6; i<=23; i++) {
+                const hour = i < 10 ? `0${i}` : i;
+                const timeStr = `${hour}:00`;
+                const isBooked = Math.random() > 0.7; // 30% chance to be booked
+                
+                const btn = document.createElement('button');
+                if(isBooked) {
+                    btn.className = 'py-2 px-1 rounded-lg border-2 border-gray-100 bg-gray-50 text-gray-300 font-bold text-xs sm:text-sm cursor-not-allowed';
+                    btn.innerText = timeStr;
+                    btn.disabled = true;
+                } else {
+                    btn.className = 'slot-btn py-2 px-1 rounded-lg border-2 border-gray-200 bg-white text-custom-dark font-bold text-xs sm:text-sm hover:border-custom-light hover:text-custom-light transition-colors';
+                    btn.innerText = timeStr;
+                    btn.dataset.time = timeStr;
+                    btn.onclick = () => toggleSlot(btn);
+                }
+                container.appendChild(btn);
+            }
+        }
+
+        function toggleSlot(btn) {
+            const time = btn.dataset.time;
+            const index = currentBookingState.selectedSlots.indexOf(time);
+            
+            if(index > -1) {
+                // Deselect
+                currentBookingState.selectedSlots.splice(index, 1);
+                btn.classList.remove('bg-custom-light', 'text-white', 'border-custom-light', 'shadow-md');
+                btn.classList.add('bg-white', 'text-custom-dark', 'border-gray-200');
+            } else {
+                // Select
+                currentBookingState.selectedSlots.push(time);
+                btn.classList.remove('bg-white', 'text-custom-dark', 'border-gray-200', 'hover:border-custom-light', 'hover:text-custom-light');
+                btn.classList.add('bg-custom-light', 'text-white', 'border-custom-light', 'shadow-md');
+            }
+            
+            updateBookingSummary();
+        }
+
+        function updateBookingSummary() {
+            const count = currentBookingState.selectedSlots.length;
+            const subtotal = count * currentBookingState.price;
+            const taxes = subtotal * currentBookingState.taxRate;
+            const total = subtotal + taxes;
+            
+            document.getElementById('summarySlotCount').innerText = count;
+            document.getElementById('summarySubtotal').innerText = subtotal.toLocaleString('en-IN');
+            document.getElementById('summaryTaxes').innerText = taxes.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('summaryTotal').innerText = total.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            
+            const payBtn = document.getElementById('proceedToPayBtn');
+            if(count > 0) {
+                payBtn.disabled = false;
+                payBtn.innerText = `Pay ₹${total.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                payBtn.onclick = () => {
+                    openModal('Booking Confirmed', `
+                        <div class="text-center py-8">
+                            <div class="w-20 h-20 rounded-full bg-green-50 text-green-500 flex items-center justify-center mx-auto mb-6 shadow-inner border border-green-100">
+                                <i class="fa-solid fa-check-circle text-5xl"></i>
+                            </div>
+                            <h4 class="text-2xl font-bold text-custom-dark mb-3">Payment Successful!</h4>
+                            <p class="text-gray-500 mb-8 font-medium px-4">You have successfully booked <span class="text-custom-dark font-bold">${count} slot(s)</span> at <span class="text-custom-dark font-bold">${document.getElementById('bookingTurfName').innerText}</span>.</p>
+                            <button class="w-full bg-custom-dark text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-black transition-colors" onclick="closeModal(); closeBookingPage();">View My Bookings</button>
+                        </div>
+                    `);
+                };
+            } else {
+                payBtn.disabled = true;
+                payBtn.innerText = 'Proceed to Pay';
+            }
+        }
+    </script>
+    <script src="js/api.js"></script>
+</body>
+
+</html>

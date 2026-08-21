@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Show - EntryMySlot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    colors: {
+                        custom: {
+                            light: '#f05a28', 
+                            dark: '#262626',  
+                            darkHover: '#1a1a1a', 
+                            lightHover: '#e04c1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::selection { background-color: #f05a28; color: #ffffff; }
+        
+        /* Seat Styles */
+        .seat {
+            width: 28px; height: 28px;
+            border-radius: 6px 6px 2px 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+        }
+        @media (max-width: 640px) {
+            .seat { width: 22px; height: 22px; font-size: 8px; border-radius: 4px 4px 1px 1px; }
+        }
+        .seat.available { background-color: #e5e7eb; border: 1px solid #d1d5db; color: #9ca3af; }
+        .seat.available:hover { background-color: #f05a28; border-color: #f05a28; color: white; transform: scale(1.1); }
+        .seat.selected { background-color: #f05a28; border-color: #f05a28; color: white; box-shadow: 0 2px 4px rgba(240,90,40,0.3), inset 0 -2px 0 rgba(0,0,0,0.15); transform: scale(1.1); }
+        .seat.booked { background-color: #fca5a5; border-color: #ef4444; color: #ef4444; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+        
+        .screen-curve {
+            width: 100%; height: 60px;
+            background: linear-gradient(to bottom, #d1d5db, transparent);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+        .screen-curve::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-custom-dark flex flex-col min-h-screen">
+    <header class="bg-custom-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-14">
+            <a href="movies.html" class="text-white hover:text-custom-light transition text-sm font-bold flex items-center">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back
+            </a>
+            <h1 class="font-bold text-lg truncate px-4" id="headerMovieTitle">Loading...</h1>
+            <div class="w-16"></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <div class="bg-white border-b border-gray-200 sticky top-14 z-40 shadow-sm py-3">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto hide-scrollbar space-x-3" id="dateFilter">
+            <!-- Dates -->
+        </div>
+    </div>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
+        
+        <!-- View 1: Cinema List -->
+        <div id="cinemaListView" class="block">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Select Theater & Time</h2>
+                <span class="text-sm text-gray-500 font-medium">Tamil - 2D</span>
+            </div>
+
+            <div class="space-y-4" id="cinemaContainer">
+                <!-- Cinema Cards -->
+            </div>
+        </div>
+
+        <!-- View 2: Seating Layout -->
+        <div id="seatingView" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6 mb-8">
+                <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-lg text-custom-dark" id="selectedCinemaName">Cinema Name</h3>
+                        <p class="text-sm text-gray-500 mt-1 font-medium"><span id="selectedDateStr">Date</span> | <span id="selectedTimeStr" class="text-custom-light font-bold">Time</span> | Screen 1</p>
+                    </div>
+                    <button class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200" onclick="showCinemaList()">Change</button>
+                </div>
+
+                <!-- Screen -->
+                <div class="mb-10 text-center relative max-w-2xl mx-auto">
+                    <div class="screen-curve"></div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">All Eyes This Way</p>
+                </div>
+
+                <!-- Seating Grid -->
+                <div class="overflow-x-auto pb-4 hide-scrollbar">
+                    <div class="min-w-[600px] flex flex-col items-center space-y-3" id="seatMap">
+                        <!-- Seats generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex justify-center gap-6 mt-8 pt-4 border-t border-gray-100 text-xs font-medium text-gray-500">
+                    <div class="flex items-center"><div class="w-4 h-4 bg-gray-200 border border-gray-300 rounded mr-2"></div> Available</div>
+                    <div class="flex items-center"><div class="w-4 h-4 bg-custom-light rounded mr-2 shadow-sm"></div> Selected</div>
+                    <div class="flex items-center"><div class="w-4 h-4 bg-red-300 rounded mr-2"></div> Booked</div>
+                </div>
+            </div>
+
+            <!-- Floating Action Bar -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-5px_15px_rgba(0,0,0,0.1)] p-4 z-50 transform translate-y-full transition-transform duration-300" id="bookingBar">
+                <div class="max-w-7xl mx-auto flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase">Selected Seats (<span id="seatCount">0</span>)</p>
+                        <p class="text-xl font-bold text-custom-dark" id="seatNames">-</p>
+                    </div>
+                    <button id="payBtn" class="bg-custom-light text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-custom-lightHover transition flex items-center" onclick="confirmBooking()">
+                        Pay ₹<span id="totalAmount">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal -->
+    <div id="bookingModal" class="fixed inset-0 z-[100] hidden bg-custom-dark/90 backdrop-blur-md flex items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl scale-95 transition-transform" id="modalContent">
+            <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fa-solid fa-check"></i></div>
+            <h2 class="text-2xl font-bold mb-2">Booking Confirmed!</h2>
+            <p class="text-sm text-gray-500 mb-6 font-medium">Your tickets have been sent to your email.</p>
+            <a href="movies.html" class="block w-full bg-custom-dark text-white font-bold py-3 rounded-lg hover:bg-black transition">Return to Movies</a>
+        </div>
+    </div>
+
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/movies.js"></script>
+    <script src="js/bookings.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var MOV = window.EMS_MOVIES;
+        var BK = window.EMS_BOOKINGS;
+        var UI = window.EMS_UI;
+        var AUTH = window.EMS_AUTH;
+        var CFG = window.EMS_API_CONFIG;
+
+        var state = {
+            movieId: null,
+            movieTitle: 'Loading...',
+            cinemas: [],
+            showtimes: [],
+            seats: [],
+            selectedShowtime: null,
+            selectedSeats: [],   // [{ seatId, label, price }]
+            holdKey: null,
+            ticketPrice: 0,
+            selectedDateStr: ''
+        };
+
+        // ── Modal (global) ───────────────────────────────────────────
+
+        window.confirmBooking = function () {
+            var modal = document.getElementById('bookingModal');
+            var content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(function () {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        };
+
+        // ── Data Loading ─────────────────────────────────────────────
+
+        async function loadCinemasAndShows() {
+            var cinemaContainer = document.getElementById('cinemaContainer');
+            if (cinemaContainer) {
+                cinemaContainer.innerHTML = '<div class="py-12 text-center text-gray-400 font-medium"><div class="inline-block w-6 h-6 border-3 border-custom-light border-t-transparent rounded-full animate-spin mr-2"></div>Loading cinemas...</div>';
+            }
+
+            try {
+                // Load showtimes filtered by movie
+                var params = {};
+                if (state.movieId) params.movieId = state.movieId;
+                if (state.selectedDateStr) params.date = state.selectedDateStr;
+
+                var result = await MOV.listShowtimes(params);
+                if (result.ok) {
+                    var data = result.data;
+                    var showtimeList = [];
+                    if (data && data.data && Array.isArray(data.data)) {
+                        showtimeList = data.data;
+                    } else if (Array.isArray(data)) {
+                        showtimeList = data;
+                    }
+
+                    // Group showtimes by cinema
+                    var cinemaMap = {};
+                    showtimeList.forEach(function (st) {
+                        var cId = st.cinemaId || st.cinema || 'unknown';
+                        if (!cinemaMap[cId]) {
+                            cinemaMap[cId] = {
+                                cinemaId: cId,
+                                cinemaName: st.cinemaName || 'Cinema',
+                                area: st.area || '',
+                                shows: []
+                            };
+                        }
+                        cinemaMap[cId].shows.push({
+                            showtimeId: st._id || st.id || st.showtimeId,
+                            time: st.startTime || st.time || '',
+                            price: st.price || 180,
+                            screen: st.screen || ''
+                        });
+                    });
+
+                    state.cinemas = Object.values(cinemaMap);
+                    state.showtimes = showtimeList;
+                } else {
+                    state.cinemas = [];
+                }
+
+                // Also try loading cinemas list for details
+                if (state.cinemas.length === 0) {
+                    var cinemasResult = await MOV.listCinemas();
+                    if (cinemasResult.ok) {
+                        var cData = cinemasResult.data;
+                        var cList = [];
+                        if (cData && cData.data && Array.isArray(cData.data)) {
+                            cList = cData.data;
+                        } else if (Array.isArray(cData)) {
+                            cList = cData;
+                        }
+
+                        // If we have showtimes but no cinemas, create cinema map from them
+                        if (state.cinemas.length === 0) {
+                            state.cinemas = cList.map(function (c) {
+                                var matchingShows = showtimeList.filter(function (s) {
+                                    return (s.cinemaId || s.cinema) === (c._id || c.id);
+                                }).map(function (s) {
+                                    return { showtimeId: s._id || s.id, time: s.startTime || s.time, price: s.price || 180, screen: s.screen || '' };
+                                });
+                                return {
+                                    cinemaId: c._id || c.id,
+                                    cinemaName: c.name,
+                                    area: c.address || c.area || '',
+                                    shows: matchingShows
+                                };
+                            });
+                        }
+                    }
+                }
+
+                renderCinemas();
+            } catch (err) {
+                if (cinemaContainer) {
+                    cinemaContainer.innerHTML = '<div class="py-12 text-center text-red-400 font-medium">Failed to load cinemas. <br><button onclick="window.reloadCinemas()" class="text-custom-light underline mt-2">Try Again</button></div>';
+                }
+            }
+        }
+
+        window.reloadCinemas = function () {
+            loadCinemasAndShows();
+        };
+
+        function renderCinemas() {
+            var cinemaContainer = document.getElementById('cinemaContainer');
+            if (!cinemaContainer) return;
+            cinemaContainer.innerHTML = '';
+
+            if (state.cinemas.length === 0) {
+                cinemaContainer.innerHTML = '<div class="py-12 text-center text-gray-400 font-medium">No cinemas available for this movie.</div>';
+                return;
+            }
+
+            state.cinemas.forEach(function (cinema) {
+                var showBtns = '';
+                if (cinema.shows && cinema.shows.length > 0) {
+                    showBtns = cinema.shows.map(function (s) {
+                        return '<button class="showtime-btn border border-green-500 text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-md text-xs font-bold transition shadow-sm" data-showtime="' + s.showtimeId + '" data-time="' + s.time + '" data-price="' + s.price + '">' + s.time + '</button>';
+                    }).join('');
+                } else {
+                    showBtns = '<span class="text-xs text-gray-400 font-medium">No shows available</span>';
+                }
+
+                var card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition';
+                card.innerHTML =
+                    '<div class="flex justify-between items-start mb-4">' +
+                        '<div><h3 class="font-bold text-custom-dark text-lg flex items-center"><i class="fa-regular fa-heart text-gray-300 hover:text-red-500 cursor-pointer mr-2 transition"></i> ' + UI.escapeHtml(cinema.cinemaName) + '</h3>' +
+                        '<p class="text-xs text-gray-500 font-medium ml-6">' + UI.escapeHtml(cinema.area) + '</p></div>' +
+                        '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded font-bold"><i class="fa-solid fa-ticket text-custom-light mr-1"></i> From ₹' + (cinema.shows && cinema.shows.length > 0 ? Math.min(...cinema.shows.map(s => s.price)) : '---') + '</span>' +
+                    '</div>' +
+                    '<div class="flex flex-wrap gap-3 ml-6">' + showBtns + '</div>';
+
+                cinemaContainer.appendChild(card);
+            });
+
+            // Attach showtime click handlers
+            cinemaContainer.querySelectorAll('.showtime-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var showtimeId = this.dataset.showtime;
+                    var time = this.dataset.time;
+                    var price = parseInt(this.dataset.price);
+                    openSeating(cinema.cinemaName, time, price, showtimeId);
+                });
+            });
+        }
+
+        // ── Seating ──────────────────────────────────────────────────
+
+        async function openSeating(cinemaName, time, price, showtimeId) {
+            document.getElementById('cinemaListView').classList.add('hidden');
+            document.getElementById('seatingView').classList.remove('hidden');
+
+            document.getElementById('selectedCinemaName').innerText = cinemaName;
+            document.getElementById('selectedTimeStr').innerText = time;
+            document.getElementById('selectedDateStr').innerText = state.selectedDateStr || 'Today';
+            state.ticketPrice = price;
+            state.selectedShowtime = showtimeId;
+            state.selectedSeats = [];
+
+            updateActionBar();
+            await loadSeatLayout(showtimeId);
+            generateSeatMap();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.showCinemaList = function () {
+            // Release held seats
+            if (state.holdKey) {
+                MOV.releaseSeats(state.holdKey).catch(function () {});
+                state.holdKey = null;
+            }
+            state.selectedSeats = [];
+            state.selectedShowtime = null;
+            document.getElementById('seatingView').classList.add('hidden');
+            document.getElementById('cinemaListView').classList.remove('hidden');
+            document.getElementById('bookingBar').classList.add('translate-y-full');
+        };
+
+        async function loadSeatLayout(showtimeId) {
+            var map = document.getElementById('seatMap');
+            map.innerHTML = '<div class="py-8 text-center text-gray-400 font-medium w-full"><div class="inline-block w-6 h-6 border-3 border-custom-light border-t-transparent rounded-full animate-spin mr-2"></div>Loading seats...</div>';
+
+            try {
+                var result = await MOV.getSeatLayout(showtimeId);
+                if (result.ok) {
+                    var data = result.data;
+                    var seatLayout = data.data || data;
+                    state.seats = Array.isArray(seatLayout) ? seatLayout : (seatLayout.seats || []);
+                } else {
+                    state.seats = [];
+                }
+            } catch (err) {
+                state.seats = [];
+            }
+
+            if (state.seats.length === 0) {
+                // Generate default seat layout
+                state.seats = generateDefaultSeats();
+            }
+        }
+
+        function generateDefaultSeats() {
+            var seats = [];
+            var rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+            rows.forEach(function (row) {
+                for (var i = 1; i <= 14; i++) {
+                    var seatId = row + i;
+                    var isBooked = Math.random() > 0.8;
+                    seats.push({ seatId: seatId, label: seatId, status: isBooked ? 'booked' : 'available', row: row, col: i, price: state.ticketPrice });
+                }
+            });
+            return seats;
+        }
+
+        function generateSeatMap() {
+            var map = document.getElementById('seatMap');
+            map.innerHTML = '';
+
+            if (state.seats.length === 0) {
+                map.innerHTML = '<div class="py-8 text-gray-400 font-medium">No seat data available.</div>';
+                return;
+            }
+
+            // Group seats by row
+            var rows = {};
+            state.seats.forEach(function (s) {
+                var rowLabel = s.row || s.label.charAt(0);
+                if (!rows[rowLabel]) rows[rowLabel] = [];
+                rows[rowLabel].push(s);
+            });
+
+            var rowKeys = Object.keys(rows).sort();
+
+            // Determine section pricing based on row
+            var premiumRows = ['A', 'B', 'C'];
+            var premiumPrice = state.ticketPrice + 50;
+
+            // Premium section label
+            var hasPremium = rowKeys.some(function (r) { return premiumRows.indexOf(r) >= 0; });
+            if (hasPremium) {
+                map.appendChild(createSectionLabel('Premium - ₹' + premiumPrice));
+                rowKeys.filter(function (r) { return premiumRows.indexOf(r) >= 0; }).forEach(function (r) {
+                    map.appendChild(createRow(r, rows[r], premiumPrice));
+                });
+                map.appendChild(createGap());
+            }
+
+            // Executive section label
+            var execRows = rowKeys.filter(function (r) { return premiumRows.indexOf(r) < 0; });
+            if (execRows.length > 0) {
+                map.appendChild(createSectionLabel('Executive - ₹' + state.ticketPrice));
+                execRows.forEach(function (r) {
+                    map.appendChild(createRow(r, rows[r], state.ticketPrice));
+                });
+            }
+        }
+
+        function createSectionLabel(text) {
+            var div = document.createElement('div');
+            div.className = 'w-full text-left text-xs font-bold text-gray-400 mb-1 border-b border-gray-100 pb-1';
+            div.innerText = text;
+            return div;
+        }
+
+        function createGap() {
+            var div = document.createElement('div');
+            div.className = 'h-4 w-full';
+            return div;
+        }
+
+        function createRow(rowId, seats, price) {
+            var rowDiv = document.createElement('div');
+            rowDiv.className = 'flex items-center space-x-1.5 sm:space-x-2';
+
+            rowDiv.innerHTML = '<span class="w-4 sm:w-6 text-center text-xs font-bold text-gray-400 mr-2">' + rowId + '</span>';
+
+            seats.forEach(function (s) {
+                // Add aisle gaps
+                var col = s.col || parseInt(s.label.substring(1)) || 0;
+                if (col === 5 || col === 11) {
+                    rowDiv.innerHTML += '<div class="w-4 sm:w-6"></div>';
+                }
+
+                var seatEl = document.createElement('div');
+                var seatStatus = s.status || 'available';
+                var seatId = s.seatId || s.label || s._id;
+
+                seatEl.className = 'seat ' + seatStatus;
+                seatEl.innerText = s.label || seatId;
+                seatEl.dataset.seatId = seatId;
+                seatEl.dataset.price = price;
+
+                if (seatStatus !== 'booked') {
+                    seatEl.addEventListener('click', function () { toggleSeat(seatEl, seatId, price); });
+                }
+
+                rowDiv.appendChild(seatEl);
+            });
+
+            rowDiv.innerHTML += '<span class="w-4 sm:w-6 text-center text-xs font-bold text-gray-400 ml-2">' + rowId + '</span>';
+            return rowDiv;
+        }
+
+        function toggleSeat(elem, id, price) {
+            if (elem.classList.contains('selected')) {
+                elem.classList.remove('selected');
+                elem.classList.add('available');
+                state.selectedSeats = state.selectedSeats.filter(function (s) { return s.seatId !== id; });
+            } else {
+                if (state.selectedSeats.length >= 10) {
+                    UI.toast('Maximum 10 seats allowed per booking.', 'warning');
+                    return;
+                }
+                elem.classList.remove('available');
+                elem.classList.add('selected');
+                state.selectedSeats.push({ seatId: id, label: elem.innerText, price: price });
+            }
+            updateActionBar();
+        }
+
+        function updateActionBar() {
+            var bar = document.getElementById('bookingBar');
+            if (state.selectedSeats.length > 0) {
+                bar.classList.remove('translate-y-full');
+                document.getElementById('seatCount').innerText = state.selectedSeats.length;
+                document.getElementById('seatNames').innerText = state.selectedSeats.map(function (s) { return s.label; }).join(', ');
+
+                var total = state.selectedSeats.reduce(function (sum, s) { return sum + s.price; }, 0);
+                var fees = total * 0.15;
+                var finalAmount = Math.round(total + fees);
+                document.getElementById('totalAmount').innerText = finalAmount.toLocaleString('en-IN');
+            } else {
+                bar.classList.add('translate-y-full');
+            }
+        }
+
+        // ── Booking Flow with Seat Hold ──────────────────────────────
+
+        async function initiateMovieBooking() {
+            var user = AUTH.getUser();
+            if (!user) {
+                document.getElementById('bookingModal').querySelector('#modalContent p').innerHTML = 'Please login to book seats. <a href="auth.html" class="text-custom-light font-bold underline">Go to Login</a>';
+                document.getElementById('bookingModal').querySelector('a[href="movies.html"]').style.display = 'none';
+                window.confirmBooking();
+                return;
+            }
+
+            var btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> Processing...';
+
+            var seatIds = state.selectedSeats.map(function (s) { return s.seatId; });
+
+            try {
+                // Step 1: Hold seats
+                var holdResult = await MOV.holdSeats(state.selectedShowtime, seatIds, CFG.SEAT_HOLD_DURATION_MS || 300000);
+                if (!holdResult.ok) {
+                    UI.toast('Could not hold seats. They may have been taken. Please try again.', 'error');
+                    resetPayButton();
+                    return;
+                }
+
+                var holdData = holdResult.data.data || holdResult.data;
+                state.holdKey = holdData.holdKey || holdData.id;
+
+                // Step 2: Create booking with holdKey
+                var total = state.selectedSeats.reduce(function (sum, s) { return sum + s.price; }, 0);
+                var bookingData = {
+                    showtimeId: state.selectedShowtime,
+                    seatIds: seatIds,
+                    holdKey: state.holdKey,
+                    totalAmount: total,
+                    tickets: state.selectedSeats.map(function (s) {
+                        return { seatLabel: s.label, price: s.price };
+                    })
+                };
+
+                var bookingResult = await BK.create(bookingData);
+                if (bookingResult.ok) {
+                    var booking = bookingResult.data.data || bookingResult.data;
+
+                    // Step 3: Initiate payment
+                    BK.initiatePayment(
+                        { bookingId: booking.bookingId || booking._id },
+                        function (paymentSessionId, orderId) {
+                            window.confirmBooking();
+                            resetPayButton();
+                            // Release hold on success (booking is confirmed)
+                            if (state.holdKey) MOV.releaseSeats(state.holdKey);
+                            state.holdKey = null;
+                        },
+                        function (errMsg) {
+                            UI.toast(errMsg || 'Payment failed. Please try again.', 'error');
+                            resetPayButton();
+                            // Release hold on failure
+                            if (state.holdKey) MOV.releaseSeats(state.holdKey);
+                            state.holdKey = null;
+                        }
+                    );
+                } else {
+                    UI.toast(bookingResult.data && bookingResult.data.message ? bookingResult.data.message : 'Booking failed. Please try again.', 'error');
+                    if (state.holdKey) MOV.releaseSeats(state.holdKey);
+                    state.holdKey = null;
+                    resetPayButton();
+                }
+            } catch (err) {
+                UI.toast(err.message || 'Something went wrong. Please try again.', 'error');
+                if (state.holdKey) MOV.releaseSeats(state.holdKey);
+                state.holdKey = null;
+                resetPayButton();
+            }
+        }
+
+        function resetPayButton() {
+            var btn = document.getElementById('payBtn');
+            btn.disabled = false;
+            btn.innerHTML = 'Pay ₹<span id="totalAmount">' + document.getElementById('totalAmount').innerText + '</span>';
+            // Re-attach onclick
+            btn.onclick = window.confirmBooking;
+        }
+
+        // ── Init ─────────────────────────────────────────────────────
+
+        function init() {
+            var urlParams = new URLSearchParams(window.location.search);
+            state.movieId = urlParams.get('id') || '';
+            state.movieTitle = urlParams.get('title') || 'Loading...';
+
+            document.getElementById('headerMovieTitle').innerText = state.movieTitle;
+
+            // Generate dates
+            var dateFilter = document.getElementById('dateFilter');
+            if (dateFilter) {
+                var today = new Date();
+                var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+                for (var i = 0; i < 5; i++) {
+                    var d = new Date(today);
+                    d.setDate(today.getDate() + i);
+                    var isSelected = i === 0;
+                    var btnClass = isSelected ? 'bg-custom-light text-white border-custom-light shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-custom-light/50';
+                    if (isSelected) {
+                        state.selectedDateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                    }
+
+                    var btn = document.createElement('button');
+                    btn.className = 'flex-none flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all ' + btnClass + ' date-btn';
+                    btn.innerHTML = '<span class="text-[10px] font-bold uppercase">' + days[d.getDay()] + '</span>' +
+                        '<span class="text-lg font-bold">' + d.getDate() + '</span>';
+                    btn.addEventListener('click', function () {
+                        dateFilter.querySelectorAll('.date-btn').forEach(function (b) {
+                            b.className = 'flex-none flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all bg-white text-gray-600 border-gray-200 hover:border-custom-light/50 date-btn';
+                        });
+                        this.className = 'flex-none flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all bg-custom-light text-white border-custom-light shadow-md date-btn';
+                        state.selectedDateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                        loadCinemasAndShows();
+                    });
+                    dateFilter.appendChild(btn);
+                }
+            }
+
+            // Override pay button onclick
+            document.getElementById('payBtn').setAttribute('onclick', 'window.confirmBooking()');
+
+            AUTH.restoreSession();
+            loadCinemasAndShows();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "event-management-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EntryMySlot — Event booking & turf management platform",
+  "workspaces": [],
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "start:backend": "cd backend && npm start",
+    "db:migrate": "cd backend && npm run db:migrate",
+    "seed:admin": "cd backend && npm run seed:admin",
+    "test": "cd backend && npm test",
+    "docs": "cd backend && npm run docs:build",
+    "format": "prettier --write \"backend/src/**/*.ts\" \"frontend/public/**/*.html\"",
+    "lint": "eslint \"backend/src/**/*.ts\""
+  },
+  "keywords": ["event-booking", "turf-management", "ems"],
+  "license": "MIT"
+}
