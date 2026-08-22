@@ -18,5 +18,8 @@
     "turf-management",
     "ems"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^7.0.2"
+  }
 }
