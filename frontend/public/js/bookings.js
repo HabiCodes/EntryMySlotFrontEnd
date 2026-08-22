@@ -80,11 +80,12 @@ window.EMS_BOOKINGS = (function () {
   }
 
   /**
-   * Verify a ticket (by ticket UUID from QR).
+   * Verify a ticket (POST /api/v1/scan/verify with body { ticket_uuid }).
+   * Requires admin auth token.
    * @param {string} ticketUuid
    */
   function verifyTicket(ticketUuid) {
-    return API.get('/tickets/' + ticketUuid + '/verify');
+    return API.post('/scan/verify', { ticket_uuid: ticketUuid });
   }
 
   // ── Payment ────────────────────────────────────────────────────

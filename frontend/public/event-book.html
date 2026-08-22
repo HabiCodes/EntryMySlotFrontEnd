@@ -548,18 +548,16 @@
             tickets.forEach(function (t) {
                 for (var i = 0; i < t.quantity; i++) {
                     attendees.push({
-                        name: (user && user.name) || '',
-                        email: (user && user.email) || '',
+                        full_name: (user && (user.name || user.username)) || '',
                         phone: (user && user.phone) || '',
                     });
                 }
             });
 
-            // POST /api/v1/events/bookings — events are FREE, no payment step
+            // POST /api/v1/bookings — backend expects { event_id: number, attendees: [{ full_name, phone }] }
             var bookingData = {
-                eventId: state.eventId,
-                tickets: tickets,
-                attendeeDetails: attendees,
+                event_id: state.eventId,
+                attendees: attendees,
             };
 
             EV.createBooking(bookingData).then(function (result) {
@@ -600,7 +598,8 @@
                 var result = await EV.getEvent(eventId);
                 if (result.ok) {
                     state.event = result.data.data || result.data;
-                    state.eventId = state.event._id || state.event.id || state.eventId;
+                    state.eventId = state.event.id || state.event._id || state.eventId;
+                    state.eventId = typeof state.eventId === 'string' ? parseInt(state.eventId, 10) : state.eventId;
                     state.ticketTypes = state.event.ticketTypes || state.event.tickets || [];
 
                     // Populate event info
@@ -647,7 +646,8 @@
             var urlParams = new URLSearchParams(window.location.search);
 
             // Read event ID from URL
-            state.eventId = urlParams.get('eventId') || urlParams.get('id') || '';
+            var eventIdStr = urlParams.get('eventId') || urlParams.get('id') || '';
+            state.eventId = eventIdStr ? parseInt(eventIdStr, 10) : '';
 
             // Check if returning from login (redirect-back flow)
             var returnUrl = sessionStorage.getItem('ems_return_url');

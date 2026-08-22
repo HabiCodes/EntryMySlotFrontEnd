@@ -112,6 +112,9 @@ window.EMS_AUTH = (function () {
   }
 
   // ── Login ──────────────────────────────────────────────────────
+  // Backend POST /auth/login { email, password }
+  // Response: { success, data: { tokens: { accessToken, refreshToken, expiresIn }, user, sessionId } }
+  // Note: tokens are nested under .tokens, NOT top-level.
   async function login(email, password) {
     var result = await API.post('/auth/login', {
       email: email,
@@ -119,8 +122,10 @@ window.EMS_AUTH = (function () {
     });
     if (result.ok && result.data && result.data.success) {
       var tokenData = result.data.data || {};
-      var token = tokenData.accessToken || tokenData.token;
-      var refreshToken = tokenData.refreshToken || tokenData.refresh_token;
+      // Backend returns { tokens: { accessToken, refreshToken, expiresIn }, user, sessionId }
+      var tokens = tokenData.tokens || {};
+      var token = tokens.accessToken || tokenData.accessToken || tokenData.token;
+      var refreshToken = tokens.refreshToken || tokenData.refreshToken || tokenData.refresh_token;
       if (token) setUserToken(token, refreshToken);
       _currentUser = tokenData.user || null;
       _notifyListeners('login', _currentUser);
@@ -181,24 +186,28 @@ window.EMS_AUTH = (function () {
     else localStorage.removeItem('ems_admin_token');
   }
 
+  /**
+   * Admin login — backend POST /admin/login { email, password }
+   * Response: { success, data: { token: string, admin: { id, email, name, role, permissions } } }
+   * Note: admin token is SINGULAR "token" field, NOT "accessToken".
+   * Note: admin has NO refresh token. JWT lasts 12h.
+   */
   async function adminLogin(email, password) {
-    var result = await API.post('/admin/auth/login', {
+    var result = await API.post('/admin/login', {
       email: email,
       password: password,
     }, { skipAuth: true });
     if (result.ok && result.data && result.data.success) {
       var tokenData = result.data.data || {};
-      var token = tokenData.accessToken || tokenData.token;
-      var refreshToken = tokenData.refreshToken || tokenData.refresh_token;
+      // Backend returns "token" (singular string), not "accessToken"
+      var token = tokenData.token;
       if (token) setAdminToken(token);
-      if (refreshToken) localStorage.setItem('ems_admin_refresh', refreshToken);
     }
     return result;
   }
 
   function adminLogout() {
     localStorage.removeItem('ems_admin_token');
-    localStorage.removeItem('ems_admin_refresh');
   }
 
   // ── Organizer Auth ─────────────────────────────────────────────

@@ -21,9 +21,9 @@ window.EMS_API_CONFIG = (function () {
     }
   })();
 
-  var defaultBase = isProduction ? 'https://entrymyslot.com' : 'http://localhost:4000';
-  var defaultWs   = isProduction ? 'https://entrymyslot.com' : 'http://localhost:4000';
-
+  // Change this line in your config script:
+var defaultBase = 'https://entrymyslot.com';
+var defaultWs   = 'https://entrymyslot.com';
   var cfg = {
     API_BASE: '/api/v1',
     // Production defaults to entrymyslot.com; localhost for dev only.

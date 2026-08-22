@@ -241,6 +241,7 @@
     <script src="js/config.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
     <script>
     'use strict';
     (function () {
@@ -257,12 +258,14 @@
         function setAdminToken(token) {
             adminToken = token;
             localStorage.setItem('ems_admin_token', token);
-            // Override API base to use admin token
             AUTH.setAdminToken(token);
         }
 
         function getAdminToken() {
-            if (!adminToken) adminToken = localStorage.getItem('ems_admin_token');
+            if (!adminToken) {
+                adminToken = localStorage.getItem('ems_admin_token');
+                if (adminToken) AUTH.setAdminToken(adminToken);
+            }
             return adminToken;
         }
 

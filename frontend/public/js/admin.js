@@ -44,7 +44,7 @@ window.EMS_ADMIN = (function () {
    * @returns {{ ok: boolean, data: object }}
    */
   function login(email, password) {
-    return API.post('/admin/auth/login', { email: email, password: password }, { skipAuth: true });
+    return API.post('/admin/login', { email: email, password: password }, { skipAuth: true });
   }
 
   // ── Profile ────────────────────────────────────────────────────

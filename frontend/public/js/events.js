@@ -101,11 +101,35 @@ window.EMS_EVENTS = (function () {
 
   /**
    * Create a free event booking.
-   * @param {Object} data - { eventId, tickets: [{ ticketTypeId, quantity }], attendeeDetails: [{ name, email, phone }] }
+   * Backend: POST /api/v1/bookings { event_id: number, attendees: [{ full_name, phone, age?, gender? }] }
+   * @param {Object} data - { eventId, attendees: [{ full_name, phone, age?, gender? }] }
    * @returns {{ ok: boolean, data: object }} booking with bookingId, status, totalAmount, tickets[]
    */
   function createBooking(data) {
-    return API.post('/events/bookings', data);
+    // Transform frontend format to backend format
+    var eventId = data.eventId || data.event_id;
+    var attendees = [];
+    if (data.attendees && Array.isArray(data.attendees)) {
+      attendees = data.attendees.map(function (a) {
+        return {
+          full_name: a.full_name || a.name || '',
+          phone: a.phone || '',
+          age: a.age,
+          gender: a.gender,
+        };
+      });
+    } else if (data.attendeeDetails && Array.isArray(data.attendeeDetails)) {
+      attendees = data.attendeeDetails.map(function (a) {
+        return {
+          full_name: a.name || '',
+          phone: a.phone || '',
+        };
+      });
+    }
+    return API.post('/bookings', {
+      event_id: eventId,
+      attendees: attendees,
+    });
   }
 
   /**

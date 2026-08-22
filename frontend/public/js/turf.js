@@ -67,12 +67,13 @@ window.EMS_TURF = (function () {
   // ── Slots ──────────────────────────────────────────────────────
 
   /**
-   * Get available slots for a ground on a given date.
-   * @param {string} groundId
+   * Get available slots for a resource on a given date.
+   * Backend: GET /api/v1/turf/resources/:resourceId/availability?date=YYYY-MM-DD
+   * @param {string} resourceId - Resource ID (not ground ID)
    * @param {string} dateStr - YYYY-MM-DD
    */
-  function getSlots(groundId, dateStr) {
-    return API.get('/turf/grounds/' + groundId + '/slots', {
+  function getSlots(resourceId, dateStr) {
+    return API.get('/turf/resources/' + resourceId + '/availability', {
       query: { date: dateStr },
     });
   }
@@ -99,28 +100,31 @@ window.EMS_TURF = (function () {
 
   /**
    * Get my turf bookings.
+   * Backend: GET /api/v1/turf/my/bookings (auth required)
    * @param {Object} params - { page, limit, status }
    */
   function myBookings(params) {
     params = params || {};
-    return API.get('/turf/bookings/my', { query: params });
+    return API.get('/turf/my/bookings', { query: params });
   }
 
   /**
    * Get single booking details.
+   * Backend: GET /api/v1/turf/my/bookings/:id (auth required)
    * @param {string} bookingId
    */
   function getBooking(bookingId) {
-    return API.get('/turf/bookings/' + bookingId);
+    return API.get('/turf/my/bookings/' + bookingId);
   }
 
   /**
    * Cancel a turf booking.
+   * Backend: POST /api/v1/turf/my/bookings/:id/cancel (auth required)
    * @param {string} bookingId
    * @param {string} reason
    */
   function cancelBooking(bookingId, reason) {
-    return API.post('/turf/bookings/' + bookingId + '/cancel', {
+    return API.post('/turf/my/bookings/' + bookingId + '/cancel', {
       reason: reason || 'Cancelled by user',
     });
   }

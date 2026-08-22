@@ -172,7 +172,7 @@ window.EMS_MOVIES = (function () {
   }
 
   function verifyTicket(ticketUuid) {
-    return API.get('/tickets/' + ticketUuid + '/verify');
+    return API.post('/scan/movies/verify', { ticket_uuid: ticketUuid });
   }
 
   return {
