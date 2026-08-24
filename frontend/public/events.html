@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events - EntryMySlot</title>
     <meta name="description" content="Discover and book upcoming events, workshops, and comedy shows.">
-    <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    function focusSearchInput() {
+        var el = document.getElementById('pageSearchInput') || document.getElementById('heroSearchInput') || document.getElementById('searchInput');
+        if (el) { el.focus(); }
+    }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -19,10 +25,10 @@
                     },
                     colors: {
                         custom: {
-                            light: '#f05a28', 
-                            dark: '#262626',  
+                            light: '#FA580B', 
+                            dark: '#0126A5',  
                             darkHover: '#1a1a1a', 
-                            lightHover: '#e04c1a'
+                            lightHover: '#D94F00'
                         }
                     }
                 }
@@ -32,7 +38,7 @@
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        ::selection { background-color: #f05a28; color: #ffffff; }
+        ::selection { background-color: #FA580B; color: #ffffff; }
         .hero-bg {
             background: linear-gradient(135deg, rgba(38,38,38,0.95) 0%, rgba(38,38,38,0.8) 100%), url('https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
         }
@@ -52,16 +58,16 @@
                     <div class="hidden sm:block flex-1 max-w-2xl">
                         <div class="relative bg-white/10 rounded-md flex items-center px-3 py-2 h-10 w-full shadow-inner border border-transparent focus-within:border-custom-light transition-colors">
                             <i class="fa-solid fa-magnifying-glass text-white/60 mr-3"></i>
-                            <input type="text"
+                            <input type="text" id="heroSearchInput"
                                 class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-white/60"
-                                placeholder="Search for Events, Comedy, Workshops...">
+                                onkeydown="if(event.key==='Enter')handleHeroSearch()" placeholder="Search for Events, Comedy, Workshops...">
                         </div>
                     </div>
                 </div>
 
                 <!-- Location and Sign In -->
                 <div class="flex items-center space-x-3 sm:space-x-6 ml-4 sm:ml-6 relative">
-                    <i class="fa-solid fa-magnifying-glass text-white sm:hidden text-lg cursor-pointer" ></i>
+                    <i class="fa-solid fa-magnifying-glass text-white sm:hidden text-lg cursor-pointer" onclick="handleHeroSearch()"></i>
                     
                     <div class="relative">
                         <button data-location-open class="flex items-center text-white hover:text-custom-light text-xs sm:text-sm font-medium transition" >
@@ -90,8 +96,8 @@
                     <a href="movies.html" class="font-bold text-gray-400 hover:text-custom-light transition py-2 border-b-2 border-transparent">Movies</a>
                 </div>
                 <div class="hidden md:flex space-x-6 text-xs font-bold">
-                    <a href="#" class="hover:text-custom-light transition" onclick="openListEventModal()">List Your Event</a>
-                    <a href="#" class="text-custom-light hover:text-white transition">Offers</a>
+                    <a href="list.html" class="hover:text-custom-light transition">List Your Event</a>
+                    <a href="index.html" class="text-custom-light hover:text-white transition">Offers</a>
                 </div>
             </div>
         </div>
@@ -107,7 +113,7 @@
                 
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button class="bg-custom-light text-white px-8 py-3.5 rounded-xl font-bold hover:bg-custom-lightHover transition shadow-lg w-full sm:w-auto" onclick="document.getElementById('eventsGrid').scrollIntoView({behavior: 'smooth'})">Explore Events</button>
-                    <button class="bg-white/10 text-white backdrop-blur-sm border border-white/20 px-8 py-3.5 rounded-xl font-bold hover:bg-white/20 transition shadow-lg w-full sm:w-auto" onclick="openListEventModal()"><i class="fa-solid fa-plus mr-2"></i> Host an Event</button>
+                    <button class="bg-white/10 text-white backdrop-blur-sm border border-white/20 px-8 py-3.5 rounded-xl font-bold hover:bg-white/20 transition shadow-lg w-full sm:w-auto" onclick="window.location.href='list.html'"><i class="fa-solid fa-plus mr-2"></i> Host an Event</button>
                 </div>
             </div>
         </div>
@@ -143,7 +149,7 @@
                     <h3 class="text-3xl font-bold text-white mb-2">Are you an Organizer?</h3>
                     <p class="text-gray-300 font-medium">List your events on EntryMySlot and reach thousands of users instantly.</p>
                 </div>
-                <button onclick="openListEventModal()" class="relative z-10 bg-custom-light text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-custom-lightHover transition-colors shadow-lg w-full md:w-auto">
+                <button onclick="window.location.href='list.html'" class="relative z-10 bg-custom-light text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-custom-lightHover transition-colors shadow-lg w-full md:w-auto">
                     Start Listing Today
                 </button>
             </div>
@@ -156,16 +162,16 @@
                 <img src="assets/images/logo.png" alt="EntryMySlot Logo" class="h-10 sm:h-12 w-auto object-contain drop-shadow-lg opacity-80 hover:opacity-100 transition-opacity">
             </a>
             <div class="flex items-center justify-center gap-2 mb-6">
-                <a href="https://facebook.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all duration-200" title="Facebook"><i class="fa-brands fa-facebook-f text-xs"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#E4405F] hover:text-white transition-all duration-200" title="Instagram"><i class="fa-brands fa-instagram text-xs"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white transition-all duration-200" title="X"><i class="fa-brands fa-x-twitter text-xs"></i></a>
-                <a href="https://youtube.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all duration-200" title="YouTube"><i class="fa-brands fa-youtube text-xs"></i></a>
-                <a href="https://wa.me" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#25D366] hover:text-white transition-all duration-200" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#1877F2] hover:text-white transition-all duration-200" title="Facebook"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#E4405F] hover:text-white transition-all duration-200" title="Instagram"><i class="fa-brands fa-instagram text-xs"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#000000] hover:text-white transition-all duration-200" title="X (Twitter)"><i class="fa-brands fa-x-twitter text-xs"></i></a>
+                <a href="https://youtube.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#FF0000] hover:text-white transition-all duration-200" title="YouTube"><i class="fa-brands fa-youtube text-xs"></i></a>
+                <a href="https://wa.me" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#25D366] hover:text-white transition-all duration-200" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>
             </div>
             <div class="flex space-x-6 mb-6">
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition">About Us</a>
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition">Contact</a>
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition">Privacy Policy</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">About Us</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">Contact</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">Privacy Policy</a>
             </div>
             <p class="text-xs text-gray-500 text-center font-medium">
                 Copyright 2026 © EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.
@@ -193,9 +199,9 @@
             <hr class="border-gray-200 my-6">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Services</p>
             
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700" onclick="openListEventModal(); toggleSidebar();">List Your Event</a>
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">Offers</a>
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700">Help & Support</a>
+            <a href="list.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar();">List Your Event</a>
+            <a href="index.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700">Offers</a>
+            <a href="index.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700">Help & Support</a>
         </div>
     </div>
 
@@ -215,7 +221,25 @@
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/events.js"></script>
+    <script src="js/events.js">
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
     <script>
     (function () {
       var EVENTS = window.EMS_EVENTS;
@@ -377,8 +401,34 @@
         // Location state managed by js/location-state.js (EMS_LOCATION)
       });
 
+        function handleHeroSearch() {
+            const q = document.getElementById('heroSearchInput').value.trim();
+            if (q) window.location.href = 'category.html?sport=all&search=' + encodeURIComponent(q);
+        }
+
         // Init page
         loadEvents();
         setupFilters();
         EMS_AUTH.restoreSession().then(updateHeaderAuth);
       });
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40">
+        <a href="index.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-solid fa-house text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="category.html?sport=all" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors" onclick="try{focusSearchInput();}catch(e){document.getElementById('pageSearchInput')&&document.getElementById('pageSearchInput').focus();}">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Search</span>
+        </a>
+        <a href="my-bookings.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-calendar-check text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Bookings</span>
+        </a>
+        <a href="profile.html" class="mobile-nav-btn flex flex-col items-center text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-user text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </div>
+</body>
+</html>

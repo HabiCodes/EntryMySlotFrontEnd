@@ -57,7 +57,7 @@ window.EMS_UI = (function () {
       overlay = document.createElement('div');
       overlay.className = 'ems-loading-overlay';
       overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:inherit;';
-      overlay.innerHTML = '<div class="ems-spinner" style="width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#f05a28;border-radius:50%;animation:ems-spin 0.8s linear infinite;"></div><p style="margin-top:12px;color:#6b7280;font-size:14px;font-family:system-ui,-apple-system,sans-serif;">' + escapeHtml(text) + '</p>';
+      overlay.innerHTML = '<div class="ems-spinner" style="width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#FA580B;border-radius:50%;animation:ems-spin 0.8s linear infinite;"></div><p style="margin-top:12px;color:#6b7280;font-size:14px;font-family:system-ui,-apple-system,sans-serif;">' + escapeHtml(text) + '</p>';
       target.style.position = target.style.position || 'relative';
       target.appendChild(overlay);
     }

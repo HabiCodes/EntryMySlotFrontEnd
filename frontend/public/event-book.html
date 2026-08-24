@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Event Tickets - EntryMySlot</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    function focusSearchInput() {
+        var el = document.getElementById('pageSearchInput') || document.getElementById('heroSearchInput') || document.getElementById('searchInput');
+        if (el) { el.focus(); }
+    }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -15,10 +21,10 @@
                     fontFamily: { sans: ['Roboto', 'sans-serif'], },
                     colors: {
                         custom: {
-                            light: '#f05a28',
-                            dark: '#262626',
+                            light: '#FA580B',
+                            dark: '#0126A5',
                             darkHover: '#1a1a1a',
-                            lightHover: '#e04c1a'
+                            lightHover: '#D94F00'
                         }
                     }
                 }
@@ -28,12 +34,12 @@
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        ::selection { background-color: #f05a28; color: #ffffff; }
+        ::selection { background-color: #FA580B; color: #ffffff; }
 
         /* QR code styling */
         .qr-container {
             background: #fff;
-            border: 3px solid #262626;
+            border: 3px solid #0126A5;
             padding: 12px;
             display: inline-block;
             border-radius: 8px;
@@ -72,11 +78,27 @@
                     <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
                 </a>
                 <div class="flex items-center gap-3">
+                    <button class="text-white hover:text-custom-light transition block md:hidden mr-2" onclick="toggleSidebar()" title="Menu"><i class="fa-solid fa-bars text-xl"></i></button>
                     <span id="userNameDisplay" class="hidden sm:block text-sm text-gray-300 font-medium"></span>
                 </div>
             </div>
         </div>
     </header>
+    <!-- Search Section -->
+    <div class="bg-white py-3 px-4 border-b border-gray-100 md:hidden">
+        <div class="max-w-3xl mx-auto">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="pageSearchInput" placeholder="Search turfs, events, movies, venues..." 
+                    class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-custom-light focus:border-custom-light transition"
+                    onkeydown="if(event.key==='Enter'){const q=this.value.trim();if(q){window.location.href='category.html?sport=all&search='+encodeURIComponent(q);}}">
+                <button onclick="const q=document.getElementById('pageSearchInput').value.trim();if(q)window.location.href='category.html?sport=all&search='+encodeURIComponent(q);" 
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-custom-light text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-custom-lightHover transition">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Back nav -->
     <div class="bg-white border-b border-gray-200 sticky top-[56px] sm:top-[64px] z-40 shadow-sm">
@@ -695,6 +717,72 @@
             init();
         }
     })();
+    
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            }
+        }
     </script>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40">
+        <a href="index.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-solid fa-house text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="category.html?sport=all" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors" onclick="try{focusSearchInput();}catch(e){document.getElementById('pageSearchInput')&&document.getElementById('pageSearchInput').focus();}">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Search</span>
+        </a>
+        <a href="my-bookings.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-calendar-check text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Bookings</span>
+        </a>
+        <a href="profile.html" class="mobile-nav-btn flex flex-col items-center text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-user text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-300" onclick="toggleSidebar()"></div>
+    <div id="mobileSidebar" class="fixed inset-y-0 right-0 w-72 bg-white z-[100] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div class="p-5 bg-custom-dark text-white flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-futbol text-2xl text-custom-light"></i>
+                <span class="font-bold text-lg">EntryMySlot</span>
+            </div>
+            <button class="hover:text-custom-light transition p-1" onclick="toggleSidebar()"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-2 text-custom-dark bg-gray-50">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-2">Sports</p>
+            <a href="category.html?sport=football" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-futbol w-6 text-center mr-3 text-custom-light"></i> Football</a>
+            <a href="category.html?sport=cricket" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-baseball-bat-ball w-6 text-center mr-3 text-custom-light"></i> Cricket</a>
+            <a href="category.html?sport=badminton" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-table-tennis-paddle-ball w-6 text-center mr-3 text-custom-light"></i> Badminton</a>
+            <a href="category.html?sport=tennis" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-baseball w-6 text-center mr-3 text-custom-light"></i> Tennis</a>
+            <a href="category.html?sport=swimming" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-person-swimming w-6 text-center mr-3 text-custom-light"></i> Swimming</a>
+            <a href="category.html?sport=basketball" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-basketball w-6 text-center mr-3 text-custom-light"></i> Basketball</a>
+            <a href="category.html?sport=volleyball" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-volleyball w-6 text-center mr-3 text-custom-light"></i> Volleyball</a>
+            <hr class="border-gray-200 my-6">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Services</p>
+            <a href="list-your-venue.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-custom-light" onclick="toggleSidebar()"><i class="fa-solid fa-plus w-6 text-center mr-3"></i> List Your Venue</a>
+            <a href="events.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-calendar-star w-6 text-center mr-3 text-custom-light"></i> Events</a>
+            <a href="movies.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-film w-6 text-center mr-3 text-custom-light"></i> Movies</a>
+            <a href="auth.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-user w-6 text-center mr-3 text-custom-light"></i> Login / Register</a>
+            <a href="my-bookings.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-calendar-check w-6 text-center mr-3 text-custom-light"></i> My Bookings</a>
+            <a href="profile.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-user w-6 text-center mr-3 text-custom-light"></i> Profile</a>
+        </div>
+    </div>
 </body>
 </html>

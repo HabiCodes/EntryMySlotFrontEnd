@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Concerts & Live Events - EntryMySlot</title>
     <meta name="description" content="Book tickets for upcoming concerts and live events on EntryMySlot.">
-    <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    function focusSearchInput() {
+        var el = document.getElementById('pageSearchInput') || document.getElementById('heroSearchInput') || document.getElementById('searchInput');
+        if (el) { el.focus(); }
+    }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -19,10 +25,10 @@
                     },
                     colors: {
                         custom: {
-                            light: '#f05a28', /* Orange */
-                            dark: '#262626',  /* Dark Grey/Black */
+                            light: '#FA580B', /* Orange */
+                            dark: '#0126A5',  /* Dark Grey/Black */
                             darkHover: '#1a1a1a', 
-                            lightHover: '#e04c1a'
+                            lightHover: '#D94F00'
                         }
                     }
                 }
@@ -32,10 +38,10 @@
     <style>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        ::selection { background-color: #f05a28; color: #ffffff; }
+        ::selection { background-color: #FA580B; color: #ffffff; }
         
         .hero-pattern {
-            background-image: radial-gradient(#f05a28 1px, transparent 1px);
+            background-image: radial-gradient(#FA580B 1px, transparent 1px);
             background-size: 20px 20px;
             background-position: 0 0, 10px 10px;
             opacity: 0.05;
@@ -81,6 +87,21 @@
             </div>
         </div>
     </header>
+    <!-- Search Section -->
+    <div class="bg-white py-3 px-4 border-b border-gray-100 md:hidden">
+        <div class="max-w-3xl mx-auto">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="pageSearchInput" placeholder="Search turfs, events, movies, venues..." 
+                    class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-custom-light focus:border-custom-light transition"
+                    onkeydown="if(event.key==='Enter'){const q=this.value.trim();if(q){window.location.href='category.html?sport=all&search='+encodeURIComponent(q);}}">
+                <button onclick="const q=document.getElementById('pageSearchInput').value.trim();if(q)window.location.href='category.html?sport=all&search='+encodeURIComponent(q);" 
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-custom-light text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-custom-lightHover transition">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
 
     <nav class="bg-custom-dark/95 backdrop-blur-md text-white text-sm border-b border-custom-dark shadow-sm relative z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -205,16 +226,16 @@
                 <img src="assets/images/logo.png" alt="EntryMySlot Logo" class="h-10 sm:h-12 w-auto object-contain drop-shadow-lg opacity-80 hover:opacity-100 transition-opacity">
             </a>
             <div class="flex items-center justify-center gap-2 mb-6">
-                <a href="https://facebook.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all duration-200" title="Facebook"><i class="fa-brands fa-facebook-f text-xs"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#E4405F] hover:text-white transition-all duration-200" title="Instagram"><i class="fa-brands fa-instagram text-xs"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white transition-all duration-200" title="X"><i class="fa-brands fa-x-twitter text-xs"></i></a>
-                <a href="https://youtube.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all duration-200" title="YouTube"><i class="fa-brands fa-youtube text-xs"></i></a>
-                <a href="https://wa.me" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[#25D366] hover:text-white transition-all duration-200" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#1877F2] hover:text-white transition-all duration-200" title="Facebook"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#E4405F] hover:text-white transition-all duration-200" title="Instagram"><i class="fa-brands fa-instagram text-xs"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#000000] hover:text-white transition-all duration-200" title="X (Twitter)"><i class="fa-brands fa-x-twitter text-xs"></i></a>
+                <a href="https://youtube.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#FF0000] hover:text-white transition-all duration-200" title="YouTube"><i class="fa-brands fa-youtube text-xs"></i></a>
+                <a href="https://wa.me" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white hover:bg-[#25D366] hover:text-white transition-all duration-200" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>
             </div>
             <div class="flex space-x-6 mb-6">
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition coming-soon-trigger">About Us</a>
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition coming-soon-trigger">Contact</a>
-                 <a href="#" class="text-sm font-medium hover:text-custom-light transition coming-soon-trigger">Privacy Policy</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">About Us</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">Contact</a>
+                 <a href="index.html" class="text-sm font-medium hover:text-custom-light transition">Privacy Policy</a>
             </div>
             <p class="text-xs text-gray-500 text-center font-medium">
                 Copyright 2026 © EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.
@@ -242,9 +263,9 @@
             <hr class="border-gray-200 my-6">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Services</p>
             
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700 coming-soon-trigger">List Your Event</a>
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700 coming-soon-trigger">Offers</a>
-            <a href="#" class="block p-3 rounded-lg hover:bg-white hover:shadow-sm font-bold transition text-gray-700 coming-soon-trigger">Help & Support</a>
+            <a href="list.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700">List Your Event</a>
+            <a href="index.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700">Offers</a>
+            <a href="index.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700">Help & Support</a>
         </div>
     </div>
 
@@ -339,5 +360,25 @@
         }
     </script>
     <script src="js/api.js"></script>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40">
+        <a href="index.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-solid fa-house text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="category.html?sport=all" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors" onclick="try{focusSearchInput();}catch(e){document.getElementById('pageSearchInput')&&document.getElementById('pageSearchInput').focus();}">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Search</span>
+        </a>
+        <a href="my-bookings.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-calendar-check text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Bookings</span>
+        </a>
+        <a href="profile.html" class="mobile-nav-btn flex flex-col items-center text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-user text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </div>
 </body>
 </html>

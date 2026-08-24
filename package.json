@@ -1,25 +1,9 @@
 {
-  "name": "event-management-platform",
+  "name": "entrymyslot-frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "EntryMySlot — Event booking & turf management platform",
+  "description": "EntryMySlot — Event booking & turf management platform (static frontend)",
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node dist/index.js\"",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "db:migrate": "knex migrate:latest",
-    "seed:admin": "node dist/seeds/admin.js",
-    "test": "jest",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint \"src/**/*.ts\""
-  },
-  "keywords": [
-    "event-booking",
-    "turf-management",
-    "ems"
-  ],
-  "license": "MIT",
-  "dependencies": {
-    "typescript": "^5.5.4"
+    "start": "npx serve . -l 3000 -s"
   }
 }

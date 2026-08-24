@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Your Venue - EntryMySlot</title>
+    <meta name="description" content="List your turf, court, or event venue on EntryMySlot.">
+<script>
+    function focusSearchInput() {
+        var el = document.getElementById('pageSearchInput') || document.getElementById('heroSearchInput') || document.getElementById('searchInput');
+        if (el) { el.focus(); }
+    }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            orange: '#FA580B',
+                            'orange-hover': '#D94F00',
+                            'orange-light': 'rgba(250,88,11,0.08)',
+                            blue: '#0126A5',
+                            'blue-hover': '#011D80',
+                            'blue-light': 'rgba(1,38,165,0.06)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::selection { background-color: #FA580B; color: #ffffff; }
+        .form-input {
+            width: 100%; padding: 12px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+            font-size: 14px; transition: all 0.2s; outline: none; background: #fff;
+        }
+        .form-input:focus { border-color: #FA580B; box-shadow: 0 0 0 3px rgba(250,88,11,0.1); }
+        .form-input::placeholder { color: #9ca3af; }
+        .btn-orange {
+            background: #FA580B; color: white; border: none; padding: 14px 28px; border-radius: 10px;
+            font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-orange:hover { background: #D94F00; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(250,88,11,0.3); }
+        .btn-orange:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-blue {
+            background: #0126A5; color: white; border: none; padding: 14px 28px; border-radius: 10px;
+            font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-blue:hover { background: #011D80; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(1,38,165,0.3); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        .card-hover.selected { border-color: #FA580B !important; box-shadow: 0 0 0 2px rgba(250,88,11,0.2); }
+        .step-indicator { transition: all 0.3s ease; }
+        .step-indicator.active { background: #FA580B; color: white; }
+        .step-indicator.done { background: #0126A5; color: white; }
+    </style>
+</head>
+<body class="bg-white font-sans text-gray-800 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-brand-blue text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="index.html" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 sm:h-12 w-auto object-contain">
+                </a>
+                <button class="text-white hover:text-custom-light transition block md:hidden mr-2" onclick="toggleSidebar()" title="Menu"><i class="fa-solid fa-bars text-xl"></i></button>
+                    <a href="index.html" class="text-white/80 hover:text-white text-sm font-medium transition flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+    <!-- Search Section -->
+    <div class="bg-white py-3 px-4 border-b border-gray-100 md:hidden">
+        <div class="max-w-3xl mx-auto">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="pageSearchInput" placeholder="Search turfs, events, movies, venues..." 
+                    class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-custom-light focus:border-custom-light transition"
+                    onkeydown="if(event.key==='Enter'){const q=this.value.trim();if(q){window.location.href='category.html?sport=all&search='+encodeURIComponent(q);}}">
+                <button onclick="const q=document.getElementById('pageSearchInput').value.trim();if(q)window.location.href='category.html?sport=all&search='+encodeURIComponent(q);" 
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-custom-light text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-custom-lightHover transition">
+                    Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="bg-brand-blue relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-brand-orange rounded-full -mr-20 -mt-20 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-brand-orange rounded-full -ml-10 -mb-10 blur-3xl"></div>
+        </div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10 text-center">
+            <div class="w-16 h-16 bg-brand-orange rounded-2xl flex items-center justify-center text-3xl font-black mx-auto mb-6 shadow-xl">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight">List Your Venue</h1>
+            <p class="text-blue-200 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                Join thousands of venue owners who trust <span class="text-brand-orange font-bold">EntryMySlot</span>. List your turf, court, ground, or event space and start receiving bookings today.
+            </p>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="py-12 sm:py-16 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-brand-blue mb-10">Why List With Us?</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                    <div class="w-14 h-14 bg-brand-orange/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-bullhorn text-brand-orange text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-brand-blue mb-2">Wider Reach</h3>
+                    <p class="text-sm text-gray-500">Get discovered by thousands of active sports and event enthusiasts in your area.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                    <div class="w-14 h-14 bg-brand-orange/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-indian-rupee-sign text-brand-orange text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-brand-blue mb-2">Better Earnings</h3>
+                    <p class="text-sm text-gray-500">Dynamic pricing, zero listing fees, and fast payouts directly to your account.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                    <div class="w-14 h-14 bg-brand-orange/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-chart-line text-brand-orange text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-brand-blue mb-2">Smart Dashboard</h3>
+                    <p class="text-sm text-gray-500">Manage bookings, track revenue, and monitor performance in real-time.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                    <div class="w-14 h-14 bg-brand-orange/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-headset text-brand-orange text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-brand-blue mb-2">Dedicated Support</h3>
+                    <p class="text-sm text-gray-500">Our team is always available to help you get the most out of your listing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Listing Form Section -->
+    <section class="py-12 sm:py-16 bg-white" id="listingForm">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-brand-blue mb-2">Create Your Listing</h2>
+            <p class="text-gray-500 text-center mb-10">Fill in the details below to list your venue or event.</p>
+
+            <!-- Step Indicators -->
+            <div class="flex items-center justify-center gap-2 mb-10">
+                <div class="step-indicator active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-600" id="step1-indicator">1</div>
+                <div class="w-8 h-0.5 bg-gray-200"></div>
+                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-600" id="step2-indicator">2</div>
+                <div class="w-8 h-0.5 bg-gray-200"></div>
+                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-200 text-gray-600" id="step3-indicator">3</div>
+            </div>
+
+            <form id="venueListingForm" onsubmit="event.preventDefault(); submitListing();">
+
+                <!-- Step 1: Venue Type & Basic Info -->
+                <div id="step1" class="space-y-6">
+                    <h3 class="text-lg font-bold text-brand-blue flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-brand-orange"></i> Basic Information
+                    </h3>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Venue Type <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="venueType" value="turf" checked class="hidden peer" onchange="toggleVenueType()">
+                                <div class="card-hover selected peer-checked:border-brand-orange peer-checked:bg-brand-orange/5 border-2 border-gray-200 rounded-xl p-5 text-center transition-all" id="type-turf">
+                                    <i class="fa-solid fa-futbol text-brand-orange text-3xl mb-2"></i>
+                                    <p class="font-bold text-sm">Sports Turf / Court</p>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="venueType" value="event" class="hidden peer" onchange="toggleVenueType()">
+                                <div class="card-hover peer-checked:border-brand-orange peer-checked:bg-brand-orange/5 border-2 border-gray-200 rounded-xl p-5 text-center transition-all" id="type-event">
+                                    <i class="fa-solid fa-calendar-star text-brand-blue text-3xl mb-2"></i>
+                                    <p class="font-bold text-sm">Event / Venue</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Venue Name <span class="text-red-500">*</span></label>
+                        <input type="text" name="venueName" class="form-input" placeholder="E.g., Greenfield Football Turf" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Venue Category <span class="text-red-500">*</span></label>
+                        <select name="category" class="form-input" required id="categorySelect">
+                            <option value="">Select a category</option>
+                            <optgroup label="Sports Turfs" id="sportOptions">
+                                <option value="Football Turf">Football Turf</option>
+                                <option value="Cricket Turf">Cricket Turf / Box Cricket</option>
+                                <option value="Badminton Court">Badminton Court</option>
+                                <option value="Tennis Court">Tennis Court</option>
+                                <option value="Basketball Court">Basketball Court</option>
+                                <option value="Swimming Pool">Swimming Pool</option>
+                                <option value="Multi-Sport Complex">Multi-Sport Complex</option>
+                            </optgroup>
+                            <optgroup label="Event Venues" id="eventOptions" class="hidden">
+                                <option value="Banquet Hall">Banquet Hall</option>
+                                <option value="Conference Hall">Conference Hall</option>
+                                <option value="Party Hall">Party Hall / Banquet</option>
+                                <option value="Outdoor Venue">Outdoor Event Space</option>
+                                <option value="Concert / Live Music">Concert / Live Music Venue</option>
+                                <option value="Theater / Auditorium">Theater / Auditorium</option>
+                                <option value="Exhibition Center">Exhibition Center</option>
+                                <option value="Wedding Venue">Wedding Venue</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                        <textarea name="description" rows="4" class="form-input" placeholder="Describe your venue — facilities, capacity, special features, etc."></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 2: Location & Amenities -->
+                <div id="step2" class="space-y-6 hidden">
+                    <h3 class="text-lg font-bold text-brand-blue flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-brand-orange"></i> Location & Amenities
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
+                            <input type="text" name="city" class="form-input" placeholder="E.g., Coimbatore" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Area / Locality <span class="text-red-500">*</span></label>
+                            <input type="text" name="area" class="form-input" placeholder="E.g., RS Puram" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Full Address <span class="text-red-500">*</span></label>
+                        <input type="text" name="address" class="form-input" placeholder="Street address, landmark, etc." required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Amenities</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Parking" class="accent-[#FA580B]"> <span class="text-sm font-medium">Parking</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Washroom" class="accent-[#FA580B]"> <span class="text-sm font-medium">Washroom</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Changing Room" class="accent-[#FA580B]"> <span class="text-sm font-medium">Changing Room</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Floodlights" class="accent-[#FA580B]"> <span class="text-sm font-medium">Floodlights</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Locker" class="accent-[#FA580B]"> <span class="text-sm font-medium">Locker</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Cafeteria" class="accent-[#FA580B]"> <span class="text-sm font-medium">Cafeteria</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="WiFi" class="accent-[#FA580B]"> <span class="text-sm font-medium">WiFi</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="First Aid" class="accent-[#FA580B]"> <span class="text-sm font-medium">First Aid</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-brand-orange transition">
+                                <input type="checkbox" name="amenities" value="Seating Area" class="accent-[#FA580B]"> <span class="text-sm font-medium">Seating Area</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Pricing & Media -->
+                <div id="step3" class="space-y-6 hidden">
+                    <h3 class="text-lg font-bold text-brand-blue flex items-center gap-2">
+                        <i class="fa-solid fa-tag text-brand-orange"></i> Pricing & Media
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Price per Slot (₹) <span class="text-red-500">*</span></label>
+                            <input type="number" name="pricePerSlot" class="form-input" placeholder="1200" min="0" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Slot Duration</label>
+                            <select name="slotDuration" class="form-input">
+                                <option value="1">1 Hour</option>
+                                <option value="2">2 Hours</option>
+                                <option value="3">3 Hours</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Contact Person <span class="text-red-500">*</span></label>
+                            <input type="text" name="contactPerson" class="form-input" placeholder="Full name" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number <span class="text-red-500">*</span></label>
+                            <input type="tel" name="contactPhone" class="form-input" placeholder="10-digit mobile number" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Venue Images</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-brand-orange transition-colors cursor-pointer" id="imageDropZone" onclick="document.getElementById('imageInput').click()">
+                            <i class="fa-solid fa-cloud-arrow-up text-brand-orange text-4xl mb-3"></i>
+                            <p class="text-sm font-medium text-gray-600">Click to upload or drag & drop images</p>
+                            <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
+                            <input type="file" id="imageInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(this)">
+                        </div>
+                        <div id="imagePreview" class="flex flex-wrap gap-3 mt-4"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-10 pt-6 border-t border-gray-100">
+                    <button type="button" id="prevBtn" onclick="changeStep(-1)" class="hidden px-6 py-3 rounded-lg border-2 border-gray-200 text-gray-600 font-bold hover:border-brand-blue hover:text-brand-blue transition">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+                    </button>
+                    <div class="flex gap-3 ml-auto">
+                        <button type="button" id="nextBtn" onclick="changeStep(1)" class="btn-orange">
+                            Next Step <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn-blue hidden">
+                            <i class="fa-solid fa-check"></i> Submit Listing
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Success Message (hidden by default) -->
+            <div id="successMessage" class="hidden text-center py-12">
+                <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-100">
+                    <i class="fa-solid fa-check-circle text-green-500 text-5xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-brand-blue mb-3">Listing Submitted!</h3>
+                <p class="text-gray-500 mb-2 max-w-md mx-auto">Thank you for listing your venue. Our team will review your submission and get back to you within 24-48 hours.</p>
+                <p class="text-sm text-gray-400 mb-8">A confirmation email has been sent to your registered email address.</p>
+                <a href="index.html" class="btn-orange inline-flex">
+                    <i class="fa-solid fa-house"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-blue text-gray-300 py-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <a href="index.html" class="flex items-center justify-center mb-4">
+                <img src="assets/images/logo.png" alt="EntryMySlot" class="h-10 w-auto object-contain opacity-80">
+            </a>
+            <p class="text-xs text-gray-400">&copy; 2026 EntryMySlot Entertainment Pvt. Ltd. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+        const indicators = [
+            document.getElementById('step1-indicator'),
+            document.getElementById('step2-indicator'),
+            document.getElementById('step3-indicator')
+        ];
+
+        function toggleVenueType() {
+            const type = document.querySelector('input[name="venueType"]:checked').value;
+            const sportOptions = document.getElementById('sportOptions');
+            const eventOptions = document.getElementById('eventOptions');
+            const turfCard = document.getElementById('type-turf');
+            const eventCard = document.getElementById('type-event');
+
+            if (type === 'turf') {
+                sportOptions.classList.remove('hidden');
+                eventOptions.classList.add('hidden');
+                turfCard.classList.add('selected');
+                turfCard.style.borderColor = '#FA580B';
+                turfCard.style.background = 'rgba(250,88,11,0.05)';
+                eventCard.classList.remove('selected');
+                eventCard.style.borderColor = '#e5e7eb';
+                eventCard.style.background = '';
+            } else {
+                sportOptions.classList.add('hidden');
+                eventOptions.classList.remove('hidden');
+                eventCard.classList.add('selected');
+                eventCard.style.borderColor = '#FA580B';
+                eventCard.style.background = 'rgba(250,88,11,0.05)';
+                turfCard.classList.remove('selected');
+                turfCard.style.borderColor = '#e5e7eb';
+                turfCard.style.background = '';
+            }
+        }
+
+        function changeStep(direction) {
+            const newStep = currentStep + direction;
+
+            // Validate current step before moving forward
+            if (direction > 0 && !validateStep(currentStep)) {
+                return;
+            }
+
+            if (newStep < 1 || newStep > totalSteps) return;
+
+            // Hide current step
+            document.getElementById('step' + currentStep).classList.add('hidden');
+
+            // Show new step
+            currentStep = newStep;
+            document.getElementById('step' + currentStep).classList.remove('hidden');
+
+            // Update indicators
+            indicators.forEach((ind, idx) => {
+                ind.classList.remove('active', 'done');
+                if (idx < currentStep - 1) {
+                    ind.classList.add('done');
+                    ind.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
+                } else if (idx === currentStep - 1) {
+                    ind.classList.add('active');
+                    ind.textContent = idx + 1;
+                } else {
+                    ind.textContent = idx + 1;
+                }
+            });
+
+            // Update buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            prevBtn.classList.toggle('hidden', currentStep === 1);
+
+            if (currentStep === totalSteps) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+
+            window.scrollTo({ top: document.getElementById('listingForm').offsetTop - 80, behavior: 'smooth' });
+        }
+
+        function validateStep(step) {
+            const stepEl = document.getElementById('step' + step);
+            const requiredFields = stepEl.querySelectorAll('[required]');
+            let valid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    valid = false;
+                    field.style.borderColor = '#ef4444';
+                    field.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
+                    field.addEventListener('input', function resetBorder() {
+                        field.style.borderColor = '#e5e7eb';
+                        field.style.boxShadow = 'none';
+                        field.removeEventListener('input', resetBorder);
+                    });
+                }
+            });
+
+            if (!valid) {
+                window.scrollTo({ top: stepEl.offsetTop - 80, behavior: 'smooth' });
+            }
+
+            return valid;
+        }
+
+        function handleImageUpload(input) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            const files = Array.from(input.files);
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-100 shadow-sm';
+                    div.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover"><button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>';
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function submitListing() {
+            if (!validateStep(3)) return;
+
+            const form = document.getElementById('venueListingForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key === 'amenities') {
+                    if (!data[key]) data[key] = [];
+                    data[key].push(value);
+                } else {
+                    data[key] = value;
+                }
+            });
+
+            console.log('Listing submitted:', data);
+
+            // Show success
+            document.getElementById('venueListingForm').classList.add('hidden');
+            document.getElementById('step1-indicator').parentElement.classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+        }
+    
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center px-2 py-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40">
+        <a href="index.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-solid fa-house text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Home</span>
+        </a>
+        <a href="category.html?sport=all" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors" onclick="try{focusSearchInput();}catch(e){document.getElementById('pageSearchInput')&&document.getElementById('pageSearchInput').focus();}">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Search</span>
+        </a>
+        <a href="my-bookings.html" class="mobile-nav-btn flex flex-col items-center text-gray-400 hover:text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-calendar-check text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Bookings</span>
+        </a>
+        <a href="profile.html" class="mobile-nav-btn flex flex-col items-center text-custom-light p-2 rounded-lg w-16 transition-colors">
+            <i class="fa-regular fa-user text-xl mb-1.5"></i>
+            <span class="text-[10px] font-bold">Profile</span>
+        </a>
+    </div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-300" onclick="toggleSidebar()"></div>
+    <div id="mobileSidebar" class="fixed inset-y-0 right-0 w-72 bg-white z-[100] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+        <div class="p-5 bg-custom-dark text-white flex justify-between items-center shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-futbol text-2xl text-custom-light"></i>
+                <span class="font-bold text-lg">EntryMySlot</span>
+            </div>
+            <button class="hover:text-custom-light transition p-1" onclick="toggleSidebar()"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-2 text-custom-dark bg-gray-50">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-2">Sports</p>
+            <a href="category.html?sport=football" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-futbol w-6 text-center mr-3 text-custom-light"></i> Football</a>
+            <a href="category.html?sport=cricket" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-baseball-bat-ball w-6 text-center mr-3 text-custom-light"></i> Cricket</a>
+            <a href="category.html?sport=badminton" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-table-tennis-paddle-ball w-6 text-center mr-3 text-custom-light"></i> Badminton</a>
+            <a href="category.html?sport=tennis" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-baseball w-6 text-center mr-3 text-custom-light"></i> Tennis</a>
+            <a href="category.html?sport=swimming" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-person-swimming w-6 text-center mr-3 text-custom-light"></i> Swimming</a>
+            <a href="category.html?sport=basketball" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-basketball w-6 text-center mr-3 text-custom-light"></i> Basketball</a>
+            <a href="category.html?sport=volleyball" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition flex items-center text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-volleyball w-6 text-center mr-3 text-custom-light"></i> Volleyball</a>
+            <hr class="border-gray-200 my-6">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Services</p>
+            <a href="list-your-venue.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-custom-light" onclick="toggleSidebar()"><i class="fa-solid fa-plus w-6 text-center mr-3"></i> List Your Venue</a>
+            <a href="events.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-calendar-star w-6 text-center mr-3 text-custom-light"></i> Events</a>
+            <a href="movies.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-solid fa-film w-6 text-center mr-3 text-custom-light"></i> Movies</a>
+            <a href="auth.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-user w-6 text-center mr-3 text-custom-light"></i> Login / Register</a>
+            <a href="my-bookings.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-calendar-check w-6 text-center mr-3 text-custom-light"></i> My Bookings</a>
+            <a href="profile.html" class="block p-3 rounded-lg hover:bg-custom-light/5 hover:shadow-sm font-bold transition text-gray-700" onclick="toggleSidebar()"><i class="fa-regular fa-user w-6 text-center mr-3 text-custom-light"></i> Profile</a>
+        </div>
+    </div>
+</body>
+</html>
